@@ -1,0 +1,86 @@
+[gd_scene load_steps=10 format=3 uid="uid://cp4px435kdc3p"]
+
+[ext_resource type="Script" path="res://Scenes/main.gd" id="1_8la2p"]
+[ext_resource type="PackedScene" uid="uid://btnlv2vwv2vd8" path="res://Scenes/Characters/player.tscn" id="1_eip41"]
+[ext_resource type="PackedScene" uid="uid://d2r7fs0237ltw" path="res://Scenes/World/floor.tscn" id="2_awqle"]
+[ext_resource type="PackedScene" uid="uid://b5kfrxlkhwr01" path="res://Scenes/Characters/punchbag.tscn" id="3_o6s3b"]
+[ext_resource type="Script" path="res://Scenes/Dead.gd" id="4_ft6to"]
+[ext_resource type="PackedScene" uid="uid://c01b7svihusgt" path="res://Scenes/UI/fight_ui.tscn" id="5_y0ins"]
+[ext_resource type="Script" path="res://Scenes/Camera.gd" id="6_84fw5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xw33e"]
+size = Vector2(3501, 614)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1uvp4"]
+size = Vector2(505.5, 2953.5)
+
+[node name="TileMap" type="TileMap"]
+format = 2
+script = ExtResource("1_8la2p")
+
+[node name="Respawn" type="Area2D" parent="."]
+collision_layer = 27
+collision_mask = 27
+script = ExtResource("4_ft6to")
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="Respawn"]
+position = Vector2(1, -936)
+shape = SubResource("RectangleShape2D_xw33e")
+debug_color = Color(0.92549, 0, 0.678431, 0.419608)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Respawn"]
+position = Vector2(1, 1651)
+shape = SubResource("RectangleShape2D_xw33e")
+debug_color = Color(0.92549, 0, 0.678431, 0.419608)
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="Respawn"]
+position = Vector2(1971.25, 258.75)
+shape = SubResource("RectangleShape2D_1uvp4")
+debug_color = Color(0.827451, 0, 0.94902, 0.419608)
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Respawn"]
+position = Vector2(-1971.25, 258.75)
+shape = SubResource("RectangleShape2D_1uvp4")
+debug_color = Color(0.827451, 0, 0.94902, 0.419608)
+
+[node name="Floor" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(-617, -1401)
+scale = Vector2(7.245, 1)
+
+[node name="Floor2" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(0, 500)
+scale = Vector2(26.37, 3.915)
+
+[node name="PunchingBag" parent="." instance=ExtResource("3_o6s3b")]
+position = Vector2(-621, -1506)
+
+[node name="Player2" parent="." instance=ExtResource("1_eip41")]
+position = Vector2(363, 283)
+collision_mask = 3
+player_id = 2
+avoid_layer = 16
+avoid_mask = 17
+
+[node name="Player" parent="." instance=ExtResource("1_eip41")]
+position = Vector2(-363, 270)
+collision_mask = 3
+device_id = 2
+player_id = 1
+avoid_layer = 8
+avoid_mask = 9
+
+[node name="HUD" parent="." instance=ExtResource("5_y0ins")]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(-9, 436)
+offset = Vector2(0, -80)
+zoom = Vector2(0.7, 0.7)
+process_callback = 0
+limit_left = -1600
+limit_top = -400
+limit_right = 1600
+limit_bottom = 1300
+position_smoothing_enabled = true
+position_smoothing_speed = 10.0
+script = ExtResource("6_84fw5")
+max_zoom = 1

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://ujncgrjaa1a1"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/down_tilt_hitbox.gd" id="1_a8xqp"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ik3xo"]
+size = Vector2(59, 54.5)
+
+[node name="DOWN_TILT_HITBOX" type="Area2D"]
+collision_mask = 3
+script = ExtResource("1_a8xqp")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(29.5, 32.75)
+shape = SubResource("RectangleShape2D_ik3xo")

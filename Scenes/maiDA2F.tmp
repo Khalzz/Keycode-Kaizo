@@ -1,0 +1,69 @@
+[gd_scene load_steps=7 format=3 uid="uid://cp4px435kdc3p"]
+
+[ext_resource type="PackedScene" uid="uid://btnlv2vwv2vd8" path="res://Scenes/Characters/player.tscn" id="1_eip41"]
+[ext_resource type="PackedScene" uid="uid://d2r7fs0237ltw" path="res://Scenes/World/floor.tscn" id="2_awqle"]
+[ext_resource type="PackedScene" uid="uid://b5kfrxlkhwr01" path="res://Scenes/Characters/punchbag.tscn" id="3_o6s3b"]
+[ext_resource type="Script" path="res://Scenes/Dead.gd" id="4_ft6to"]
+[ext_resource type="PackedScene" uid="uid://c01b7svihusgt" path="res://Scenes/UI/fight_ui.tscn" id="5_y0ins"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xw33e"]
+size = Vector2(3538, 216)
+
+[node name="World" type="Node2D"]
+
+[node name="Respawn" type="Area2D" parent="."]
+collision_layer = 3
+collision_mask = 3
+script = ExtResource("4_ft6to")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Respawn"]
+position = Vector2(259, 740)
+shape = SubResource("RectangleShape2D_xw33e")
+debug_color = Color(0.92549, 0, 0.678431, 0.419608)
+
+[node name="Floor" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(1207, 134)
+scale = Vector2(7.245, 1)
+
+[node name="Floor2" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(247, 448)
+scale = Vector2(33.29, 1)
+
+[node name="PunchingBag" parent="." instance=ExtResource("3_o6s3b")]
+position = Vector2(420, 18)
+
+[node name="Player2" parent="." instance=ExtResource("1_eip41")]
+position = Vector2(69.305, 0)
+device_id = 2
+
+[node name="Camera2D2" type="Camera2D" parent="Player2"]
+offset = Vector2(0, -80)
+zoom = Vector2(0.7, 0.7)
+process_callback = 0
+position_smoothing_enabled = true
+position_smoothing_speed = 10.0
+
+[node name="Player" parent="." instance=ExtResource("1_eip41")]
+position = Vector2(35, 353)
+device_id = null
+
+[node name="Camera2D2" type="Camera2D" parent="Player"]
+offset = Vector2(0, -80)
+zoom = Vector2(0.7, 0.7)
+process_callback = 0
+position_smoothing_enabled = true
+position_smoothing_speed = 10.0
+
+[node name="HUD" parent="." instance=ExtResource("5_y0ins")]
+
+[node name="Floor3" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(-402, 162)
+scale = Vector2(0.865, 14.715)
+
+[node name="Floor4" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(892, 171)
+scale = Vector2(0.865, 14.715)
+
+[node name="Floor5" parent="." instance=ExtResource("2_awqle")]
+position = Vector2(243, -115)
+scale = Vector2(33.29, 1)

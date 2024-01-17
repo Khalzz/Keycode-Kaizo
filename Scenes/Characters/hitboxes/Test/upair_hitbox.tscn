@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://w2ediwfail4o"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/UPAIR_HITBOX.gd" id="1_r76tc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ftdqe"]
+size = Vector2(32, 42)
+
+[node name="UPAIR_HITBOX" type="Area2D"]
+script = ExtResource("1_r76tc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -28)
+shape = SubResource("RectangleShape2D_ftdqe")

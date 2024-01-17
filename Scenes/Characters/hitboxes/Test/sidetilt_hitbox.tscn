@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://boglq21xh1aex"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/sidetilt_hitbox.gd" id="1_hsgu6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xd2ir"]
+size = Vector2(51, 20)
+
+[node name="SIDETILT_HITBOX" type="Area2D"]
+script = ExtResource("1_hsgu6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(15.5, -14.25)
+shape = SubResource("RectangleShape2D_xd2ir")

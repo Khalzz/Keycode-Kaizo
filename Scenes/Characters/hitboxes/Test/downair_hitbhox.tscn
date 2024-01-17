@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://bx768iceq72re"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/DOWNAIR_HITBHOX.gd" id="1_qtvfv"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fr75b"]
+size = Vector2(30, 45)
+
+[node name="DOWNAIR_HITBHOX" type="Area2D"]
+script = ExtResource("1_qtvfv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 24.5)
+shape = SubResource("RectangleShape2D_fr75b")

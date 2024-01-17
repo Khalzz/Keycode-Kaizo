@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqvv4kuglti0i"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/dash_attack_hitbox.gd" id="1_c0arb"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_as7x7"]
+size = Vector2(37, 16)
+
+[node name="DASH_ATTACK_HITBOX" type="Area2D"]
+script = ExtResource("1_c0arb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(26.5, -8)
+shape = SubResource("RectangleShape2D_as7x7")

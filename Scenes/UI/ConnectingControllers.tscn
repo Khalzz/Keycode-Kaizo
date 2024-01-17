@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://dsd35slmiuhhb"]
+
+[ext_resource type="Texture2D" uid="uid://csyanchb2iyjt" path="res://Assets/Sprites/Others/PlayerSelection/Press START to connect.svg" id="1_ye63p"]
+[ext_resource type="Script" path="res://Scenes/UI/PlayerConnection.gd" id="2_vnhhq"]
+
+[node name="Node2D" type="CanvasLayer"]
+
+[node name="Player1" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(288, 324)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_ye63p")
+script = ExtResource("2_vnhhq")
+
+[node name="Player2" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(864, 324)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_ye63p")
+script = ExtResource("2_vnhhq")
+playerIndex = 1
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0.184314, 0, 0.25098, 1)

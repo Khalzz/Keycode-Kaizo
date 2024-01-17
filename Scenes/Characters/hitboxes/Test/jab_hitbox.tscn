@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://b6b0y5nbglke3"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/jab_hitbox.gd" id="1_pgq3y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a2bdo"]
+size = Vector2(34, 13)
+
+[node name="JAB_HITBOX" type="Area2D"]
+collision_layer = 2
+script = ExtResource("1_pgq3y")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(23, -10)
+scale = Vector2(1.1, 1.1)
+shape = SubResource("RectangleShape2D_a2bdo")

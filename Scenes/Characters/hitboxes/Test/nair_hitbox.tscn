@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://brbtkvbimiilt"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/nair_hitbox.gd" id="1_ipoas"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_h4nni"]
+radius = 25.0
+height = 50.0
+
+[node name="NAIR_HITBOX" type="Area2D"]
+collision_mask = 3
+script = ExtResource("1_ipoas")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(7, -5)
+shape = SubResource("CapsuleShape2D_h4nni")
