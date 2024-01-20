@@ -6,7 +6,6 @@ func _ready():
 	$Camera2D.add_target($Player2)
 	$Camera2D.add_target($Player)
 	
-	var r = get_
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

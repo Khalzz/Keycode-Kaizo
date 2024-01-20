@@ -10,7 +10,6 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	print(starting)
 	if GlobalController.players.size() >= playerIndex + 1:
 		texture = load("res://Assets/Sprites/Others/PlayerSelection/READY.svg")
 		

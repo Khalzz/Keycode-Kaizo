@@ -62,3 +62,5 @@ func _process(delta):
 			play('AVOID')
 		States.PUNCHED:
 			play('PUNCHED')
+		States.LEDGE:
+			play('LEDGE')

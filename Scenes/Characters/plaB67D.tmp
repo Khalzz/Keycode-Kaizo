@@ -87,17 +87,11 @@ var bounceDivisor = 1
 var starting_layer
 var starting_mask
 
-# LEDGE
 var ledge_timer = 0.0
 var porposefull_unledged = false
 var ledgeResetTimer = 0.0
 var resetLedge = false
 var flagLedging = false
-var ledge_direction = 0
-
-var can_fastfall = false
-var fastfall_window = false
-var fastfalling_timer = 0.0
 
 func _ready():
 	device_id = GlobalController.players[player_id - 1]
@@ -107,12 +101,19 @@ func _ready():
 	
 func _process(delta):
 	hud.setLive(life, player_id)
+	#print(str(player_id) + \"-mask: \" + str(collision_mask))
+	#print(str(player_id) + \"-layer: \" + str(collision_layer))
+
+func _input(event):
+	pass
+	#print(event.device)
 
 func _physics_process(delta):
 	inputMovement() # here i get the values of direction
 	inputControllers()
 	touchingFloor(delta) # this function i will use it if the user is touching the floor or not
 	stateReseters() # reseters of data
+	
 	
 	if isActive:
 		if state != States.DOWNED and state != States.STANDING and state != States.ROLLING and state != States.PUNCHED:
@@ -124,23 +125,12 @@ func _physics_process(delta):
 			shieldLogic()
 			shieldRoll()
 			ledgeLogic(delta)
-			fastfalling(delta)
 		else:
 			downedLogic()
 	else:
 		activeReset(delta)
+		
 	bouncingLogic(delta)
-
-func fastfalling(delta):
-	if fastfall_window:
-		fastfalling_timer += delta
-		if fastfalling_timer < 0.15:
-			$FastFalling.texture = load(\"res://Assets/Sprites/Others/InGame/FastFalling.svg\")
-			if direction.y < -0.7: 
-				velocity.y = -JUMP_VELOCITY * 2
-		else:
-			$FastFalling.texture = load(\"\")
-			fastfall_window = false
 
 func bouncingLogic(delta):
 	if state == States.PUNCHED and !is_on_floor() and punchedTime > 2:
@@ -167,14 +157,6 @@ func standPosition():
 	bounceDivisor = 1
 
 func recieve_damage(multiplier, vector, damage):
-	if state == States.LEDGE:
-		flagLedging = false
-		porposefull_unledged = true
-		$Sprite2D.modulate.a = 1.0
-		resetLedge = true
-		ledgeResetTimer = 0.0
-		jumpCount = 1
-	
 	bounceDivisor = 1
 	life += damage
 	var sum_to_damage = ((4.0 / 100.0) * life)
@@ -258,6 +240,8 @@ func touchingFloor(delta):
 		if state == States.WALKING or state == States.RUNNING or state == States.IDLE:
 			state = States.FALLING
 		velocity.y += gravity * delta
+		if direction.y < -0.8:
+			velocity.y = -JUMP_VELOCITY * 2
 
 func activeReset(delta):
 	dash_timer += delta
@@ -275,6 +259,20 @@ func activeReset(delta):
 	resetRolling(dash_timer)
 	resetAvoid(dash_timer)
 	resetPunched(dash_timer)
+
+func stateReseters():
+	if (tilt.x > -0.8 and tilt.x < 0.8 and tilt.y > -0.8 and tilt.y < 0.8 ):
+		canTilt = true
+
+	# y and x
+	if !jump_input:
+		canJumpEsp = true
+
+	if isWalking and direction.x == 0:
+		isWalking = false
+		
+	if shieldDirection.x < 0.8 and shieldDirection.x > -0.8 and shieldDirection.y < 0.8 and shieldDirection.y > -0.8:
+		canRoll = true
 		
 func shieldRoll():
 	if state == States.SHIELDING and (shieldDirection.x > 0.8 or shieldDirection.x < -0.8) and (shieldDirection.y < 0.8 and shieldDirection.y > -0.8) and canRoll:
@@ -285,56 +283,16 @@ func shieldRoll():
 		avoid()
 
 func jumpLogic(delta):
-	if !is_on_floor() and jumpCount > 1:
-		jumpCount = 1
-	
+	print(is_jumping)
 	if is_jumping:
 		jump_timer += delta
-		
-		if state == States.LEDGE and isActive and jump_input:
-			velocity.y = JUMP_VELOCITY
-			
-			collision_layer = starting_layer
-			collision_mask = starting_mask
-		
-			flagLedging = false
-			porposefull_unledged = true
-			$Sprite2D.modulate.a = 1.0
-			resetLedge = true
-			ledgeResetTimer = 0.0
-			jumpCount = 0
-		
 		if jump_input and jump_timer < MAX_JUMP_TIME:
 			state = States.JUMPING
 			velocity.y = JUMP_VELOCITY
-			
 		else:
 			state = States.FALLING
 			is_jumping = false
 			jump_timer = 0
-		
-		# Fast falling
-		if velocity.y != JUMP_VELOCITY and !flagLedging:
-			if can_fastfall:
-				fastfalling_timer = 0.0
-				fastfall_window = true
-	
-
-func stateReseters():
-	if (tilt.x > -0.8 and tilt.x < 0.8 and tilt.y > -0.8 and tilt.y < 0.8):
-		canTilt = true
-
-	if !jump_input:
-		canJumpEsp = true
-
-	if isWalking and direction.x == 0:
-		isWalking = false
-		
-	if shieldDirection.x < 0.8 and shieldDirection.x > -0.8 and shieldDirection.y < 0.8 and shieldDirection.y > -0.8:
-		canRoll = true
-		
-	if direction.y < 0.3 and direction.y > -0.3 and direction.x < 0.3 and direction.x > -0.3 and !is_on_floor():
-		can_fastfall = true
 
 	if jump_input:
 		if (state == States.FALLING and jumpCount > 0 and canJumpEsp) or is_on_floor() or state == States.LEDGE:
@@ -343,8 +301,6 @@ func stateReseters():
 			canJumpEsp = false
 			is_jumping = true
 			jump_timer = 0
-			if !(direction.y < 0.7 and direction.y > -0.7):
-				can_fastfall = false
 
 func movementLogic(delta):
 	if direction.x != 0 and state != States.DASH_ATTACK:
@@ -418,10 +374,8 @@ func GrabLedge(direction_val, position_hitbox, hitboxList, delta):
 		
 		if jump_direction > 0:
 			spec_direction = 1
-			ledge_direction = 1
 		else:
 			spec_direction = -1
-			ledge_direction = -1
 		
 		if spec_direction == direction_val:
 			collision_layer = avoid_layer
@@ -439,40 +393,25 @@ func GrabLedge(direction_val, position_hitbox, hitboxList, delta):
 				collision_layer = starting_layer
 				collision_mask = starting_mask
 				$Sprite2D.modulate.a = 1.0
-			elif ledge_timer < 0.3:
-				$Sprite2D.modulate.a = 0.5
-				isActive = false
 			else:
-				isActive = true
+				$Sprite2D.modulate.a = 0.5
 		jumpCount = 2
 
 func ledgeLogic(delta):
-	var condition_side
-	if ledge_direction > 0:
-		condition_side = direction.x < -0.8
-	else:
-		condition_side = direction.x > 0.8
 	ledgeResetTimer += delta
 	
-	if state == States.LEDGE:
-		# grab ledge a la derecha esta bugeado
-		if direction.y <= -0.8 or condition_side:
-			state = States.FALLING
-			
-			collision_layer = starting_layer
-			collision_mask = starting_mask
-		
-			flagLedging = false
-			porposefull_unledged = true
-			$Sprite2D.modulate.a = 1.0
-			resetLedge = true
-			ledgeResetTimer = 0.0
-
-
+	if state == States.LEDGE and jump_input:
+		flagLedging = false
+		porposefull_unledged = true
+		collision_layer = starting_layer
+		collision_mask = starting_mask
+		$Sprite2D.modulate.a = 1.0
+		resetLedge = true
+		ledgeResetTimer = 0.0
+	
 	if ledgeResetTimer > 0.2 and resetLedge:
 		porposefull_unledged = false
 		resetLedge = false
-
 # Attacks / movements ------------------------------------------------------------------------------
 func baseAirAttack(playerState):
 	collision_layer = avoid_layer
@@ -644,10 +583,10 @@ func resetPunched(dash_timer):
 	if state == States.PUNCHED:
 		bouncing = true
 		if dash_timer >= 0.2:
-			if punchedTime > 0.5 and velocity.length() < 20 or punchedTime > 0.5 and dash_timer >= punchedTime/2:
+			if punchedTime > 2 and velocity.length() < 20 or punchedTime > 2 and dash_timer >= punchedTime/2:
 				isActive = true
 				state = States.DOWNED
-			if (dash_timer >= punchedTime and dash_timer < 0.5) or is_on_floor():
+			if (dash_timer >= punchedTime and dash_timer < 2) or is_on_floor():
 				collision_layer = starting_layer
 				collision_mask = starting_mask
 				attackableTrue()
@@ -917,38 +856,6 @@ tracks/0/keys = {
 "values": [26]
 }
 
-[sub_resource type="Animation" id="Animation_ml15n"]
-resource_name = "LEDGE"
-length = 0.1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [44]
-}
-
-[sub_resource type="Animation" id="Animation_fr7s7"]
-resource_name = "LEDGE_NEW"
-length = 0.1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.1),
-"transitions": PackedFloat32Array(1, 0.170755),
-"update": 1,
-"values": [44, 45]
-}
-
 [sub_resource type="Animation" id="Animation_yme35"]
 resource_name = "NEUTRAL_AIR"
 length = 0.1
@@ -980,9 +887,6 @@ tracks/0/keys = {
 "update": 0,
 "values": [42]
 }
-
-[sub_resource type="Animation" id="Animation_pf5cd"]
-length = 0.001
 
 [sub_resource type="Animation" id="Animation_vtrkj"]
 resource_name = "ROLLING"
@@ -1164,6 +1068,41 @@ tracks/0/keys = {
 "values": [18]
 }
 
+[sub_resource type="Animation" id="Animation_ml15n"]
+resource_name = "LEDGE"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [44]
+}
+
+[sub_resource type="Animation" id="Animation_fr7s7"]
+resource_name = "LEDGE_NEW"
+length = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1),
+"transitions": PackedFloat32Array(1, 0.170755),
+"update": 1,
+"values": [44, 45]
+}
+
+[sub_resource type="Animation" id="Animation_pf5cd"]
+length = 0.001
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_2gus0"]
 _data = {
 "AVOID": SubResource("Animation_0sehn"),
@@ -1270,6 +1209,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 2
 vframes = 23
+frame = 44
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource("14_vt1v8")
@@ -1279,7 +1219,3 @@ position = Vector2(0, -62)
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("15_xg3ct")
 script = ExtResource("15_0eqv6")
-
-[node name="FastFalling" type="Sprite2D" parent="."]
-position = Vector2(14, -34)
-scale = Vector2(0.16, 0.16)

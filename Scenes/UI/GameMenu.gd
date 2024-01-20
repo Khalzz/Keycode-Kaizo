@@ -6,8 +6,8 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	print(GlobalController.players)
-
+	pass
+	
 func _input(event):
 	if event.is_action_pressed("start"):
 		if !GlobalController.players.has(event.device):

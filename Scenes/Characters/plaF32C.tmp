@@ -124,12 +124,12 @@ func _physics_process(delta):
 			shieldLogic()
 			shieldRoll()
 			ledgeLogic(delta)
-			fastfalling(delta)
 		else:
 			downedLogic()
 	else:
 		activeReset(delta)
 	bouncingLogic(delta)
+	fastfalling(delta)
 
 func fastfalling(delta):
 	if fastfall_window:
@@ -167,14 +167,6 @@ func standPosition():
 	bounceDivisor = 1
 
 func recieve_damage(multiplier, vector, damage):
-	if state == States.LEDGE:
-		flagLedging = false
-		porposefull_unledged = true
-		$Sprite2D.modulate.a = 1.0
-		resetLedge = true
-		ledgeResetTimer = 0.0
-		jumpCount = 1
-	
 	bounceDivisor = 1
 	life += damage
 	var sum_to_damage = ((4.0 / 100.0) * life)
@@ -291,9 +283,7 @@ func jumpLogic(delta):
 	if is_jumping:
 		jump_timer += delta
 		
-		if state == States.LEDGE and isActive and jump_input:
-			velocity.y = JUMP_VELOCITY
-			
+		if state == States.LEDGE:
 			collision_layer = starting_layer
 			collision_mask = starting_mask
 		
@@ -314,18 +304,18 @@ func jumpLogic(delta):
 			jump_timer = 0
 		
 		# Fast falling
-		if velocity.y != JUMP_VELOCITY and !flagLedging:
+		if velocity.y != JUMP_VELOCITY:
 			if can_fastfall:
 				fastfalling_timer = 0.0
 				fastfall_window = true
-	
 
 func stateReseters():
 	if (tilt.x > -0.8 and tilt.x < 0.8 and tilt.y > -0.8 and tilt.y < 0.8):
 		canTilt = true
 
 	if !jump_input:
-		canJumpEsp = true
+		pass
+		#canJumpEsp = true
 
 	if isWalking and direction.x == 0:
 		isWalking = false
@@ -440,7 +430,7 @@ func GrabLedge(direction_val, position_hitbox, hitboxList, delta):
 				collision_mask = starting_mask
 				$Sprite2D.modulate.a = 1.0
 			elif ledge_timer < 0.3:
-				$Sprite2D.modulate.a = 0.5
+				$Sprite2D.modulate.a = 0.5				
 				isActive = false
 			else:
 				isActive = true
@@ -454,9 +444,12 @@ func ledgeLogic(delta):
 		condition_side = direction.x > 0.8
 	ledgeResetTimer += delta
 	
+	print(condition_side)
+	
 	if state == States.LEDGE:
 		# grab ledge a la derecha esta bugeado
 		if direction.y <= -0.8 or condition_side:
+			print(\"worked\")
 			state = States.FALLING
 			
 			collision_layer = starting_layer
@@ -467,8 +460,9 @@ func ledgeLogic(delta):
 			$Sprite2D.modulate.a = 1.0
 			resetLedge = true
 			ledgeResetTimer = 0.0
-
-
+		
+		
+	
 	if ledgeResetTimer > 0.2 and resetLedge:
 		porposefull_unledged = false
 		resetLedge = false
@@ -644,10 +638,10 @@ func resetPunched(dash_timer):
 	if state == States.PUNCHED:
 		bouncing = true
 		if dash_timer >= 0.2:
-			if punchedTime > 0.5 and velocity.length() < 20 or punchedTime > 0.5 and dash_timer >= punchedTime/2:
+			if punchedTime > 2 and velocity.length() < 20 or punchedTime > 2 and dash_timer >= punchedTime/2:
 				isActive = true
 				state = States.DOWNED
-			if (dash_timer >= punchedTime and dash_timer < 0.5) or is_on_floor():
+			if (dash_timer >= punchedTime and dash_timer < 2) or is_on_floor():
 				collision_layer = starting_layer
 				collision_mask = starting_mask
 				attackableTrue()
