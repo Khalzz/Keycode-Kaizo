@@ -18,7 +18,9 @@
 [ext_resource type="Script" path="res://Scenes/Characters/AnimationPlayer.gd" id="35_na8g4"]
 
 [sub_resource type="GDScript" id="GDScript_yv2bm"]
-script/source = "extends CharacterBody2D
+script/source = "# TODO: fix collision masks sometimes it stops checking for collisions for punches
+# TODO: if the player is downed by another player and it falls the hitbox dont works
+extends CharacterBody2D
 
 @export var device_id = 0
 @export var its_analog = true
@@ -162,6 +164,9 @@ func resetDowned(delta):
 		if downed_timer >= 3:
 			standPosition()
 
+func attackableTrue():
+	attackable = true
+
 func standPosition():
 	state = States.IDLE
 	bounceDivisor = 1
@@ -246,7 +251,7 @@ func shieldLogic():
 		velocity.x = 0
 
 func crouchLogic():
-	if direction.y < -0.6 and direction.x < 0.2 and direction.x > -0.2 and is_on_floor():
+	if direction.y < -0.8 and direction.x < 0.2 and direction.x > -0.2 and is_on_floor():
 		state = States.CROUCHING
 		velocity.x = 0
 
@@ -321,7 +326,7 @@ func jumpLogic(delta):
 	
 
 func stateReseters():
-	if (tilt.x > -0.6 and tilt.x < 0.6 and tilt.y > -0.6 and tilt.y < 0.6):
+	if (tilt.x > -0.8 and tilt.x < 0.8 and tilt.y > -0.8 and tilt.y < 0.8):
 		canTilt = true
 
 	if !jump_input:
@@ -369,31 +374,32 @@ func floorAttacks():
 				state = States.JAB
 				dash_timer = 0.0
 		if (direction.x >= 0.2 or direction.x <= -0.2):
+			print(basic_attack_flag)
 			if basic_attack_input and basic_attack_flag:
 				basic_attack_flag = false
 				sideTiltAttack()
 
-		if ((state == States.WALKING or state == States.IDLE or state == States.CROUCHING) and (tilt.x < -0.6 or tilt.x > 0.6) and canTilt) and state != States.SHIELDING:
+		if ((state == States.WALKING or state == States.IDLE or state == States.CROUCHING) and (tilt.x < -0.8 or tilt.x > 0.8) and canTilt) and state != States.SHIELDING:
 			if state == States.IDLE:
 				last_direction = tilt.x
 			sideTiltAttack()
 
-		if ((state == States.CROUCHING and basic_attack_input) or is_on_floor() and tilt.y < -0.6) and canTilt:
+		if ((state == States.CROUCHING and basic_attack_input) or is_on_floor() and tilt.y < -0.8) and canTilt:
 			velocity.x = 0
 			downTiltAttack()
 
-		if (((direction.y > 0.5 and basic_attack_input) or is_on_floor() and tilt.y > 0.6) and canTilt):
+		if (((direction.y > 0.5 and basic_attack_input) or is_on_floor() and tilt.y > 0.8) and canTilt):
 			upTiltAttack()
-	elif (state == States.RUNNING and (basic_attack_input or (tilt.x < -0.6 or tilt.x > 0.6))) and state != States.SHIELDING:
+	elif (state == States.RUNNING and (basic_attack_input or (tilt.x < -0.8 or tilt.x > 0.8))) and state != States.SHIELDING:
 		dashAttack()
 
 func airAttacks():
 	if state == States.FALLING:
 		if basic_attack_input and direction.y > -0.1 and direction.y < 0.1 and direction.x == 0:
 			baseAirAttack(States.NEUTRAL_AIR)
-		if ((direction.y < -0.1 and basic_attack_input) or tilt.y < -0.6) and canTilt:
+		if ((direction.y < -0.1 and basic_attack_input) or tilt.y < -0.8) and canTilt:
 			baseAirAttack(States.DOWN_AIR)
-		if ((direction.y > 0.1 and basic_attack_input) or tilt.y > 0.6) and canTilt:
+		if ((direction.y > 0.1 and basic_attack_input) or tilt.y > 0.8) and canTilt:
 			baseAirAttack(States.UP_AIR)
 		isForwardAir()
 		isBackAir()
@@ -567,7 +573,15 @@ func resetDownAir(dash_timer):
 func resetSideTilt(dash_timer):
 	if state == States.SIDETILT:
 		if dash_timer >= 0.2:
-			coolDownAttack(0.1, States.IDLE, true)
+			state = States.IDLE
+			isWalking = true
+			isActive = true
+			#cooldown_timer = 0.0
+			#cooldown_active = true
+			coolDownAttack(1.0)
+
+func coolDownAttack(time):
+	print(await get_tree().create_timer(2.0).timeout)
 
 func resetUpAir(dash_timer):
 	if state == States.UP_AIR:
@@ -606,7 +620,9 @@ func resetUpTilt(dash_timer):
 func resetDownTilt(dash_timer):
 	if state == States.DOWNTILT:
 		if dash_timer >= 0.2:
-			coolDownAttack(0.1, States.CROUCHING, false)
+			state = States.IDLE
+			isWalking = true
+			isActive = true
 
 func resetJab(dash_timer):
 	if state == States.JAB:
@@ -649,18 +665,12 @@ func resetPunched(dash_timer):
 			if (dash_timer >= punchedTime and dash_timer < 0.5) or is_on_floor():
 				collision_layer = starting_layer
 				collision_mask = starting_mask
-				attackable = true
+				attackableTrue()
 				standPosition()
 				isActive = true
 				attackable = true
 				state = States.IDLE
-
-func coolDownAttack(time, newState, walkable):
-	state = newState
-	await get_tree().create_timer(time).timeout
-	if walkable:
-		isWalking = true
-	isActive = true
+			
 "
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0atph"]
