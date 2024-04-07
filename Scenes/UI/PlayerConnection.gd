@@ -16,4 +16,3 @@ func _process(delta):
 	if GlobalController.players.size() == 2 and starting == false:
 		get_tree().change_scene_to_file("res://Scenes/main.tscn")
 		starting = true
-	

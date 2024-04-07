@@ -54,7 +54,7 @@ var jump_timer = 0
 
 # Dash Attack values
 var dash_timer = 0.2
-var dash_distance = 900.0
+var dash_distance = 1000.0
 
 # Attacks with timer
 var isActive = true
@@ -82,7 +82,6 @@ var attackable = true
 var bouncing = false
 var timer = 0.0
 var downed_timer = 0.0
-var shieldTimer = 0
 var punchedTime = 0.0
 var bounceDivisor = 1
 
@@ -102,6 +101,7 @@ var fastfall_window = false
 var fastfalling_timer = 0.0
 
 func _ready():
+	
 	if player_id == 1:
 		$Sprite2D.modulate.r = 1
 		$Sprite2D.modulate.g = 0.7
@@ -110,12 +110,14 @@ func _ready():
 		$Sprite2D.modulate.r = 0.7
 		$Sprite2D.modulate.g = 0.7
 		$Sprite2D.modulate.b = 1
+	
 	device_id = GlobalController.players[player_id - 1]
 	starting_layer = collision_layer
 	starting_mask = collision_mask
 	hud = get_node(\"../HUD\")
 	
 func _process(delta):
+	# if the element is not moving disapear the facing
 	rotate_to_direction($Facing, 1)
 	hud.setLive(life, player_id)
 
@@ -132,7 +134,7 @@ func _physics_process(delta):
 			crouchLogic()
 			floorAttacks()
 			airAttacks()
-			shieldLogic(delta)
+			shieldLogic()
 			shieldRoll()
 			ledgeLogic(delta)
 			if state != States.LEDGE:
@@ -142,7 +144,7 @@ func _physics_process(delta):
 	else:
 		activeReset(delta)
 	bouncingLogic(delta)
-
+	
 func basicAttackTrueValue():
 	if !basic_attack_flag and !basic_attack_input:
 		basic_attack_flag = true
@@ -159,14 +161,14 @@ func fastfalling(delta):
 			fastfall_window = false
 
 func rotate_to_direction(element, mod):
-	if velocity.length() == 0 and mod > 0: 
+	if velocity.length() == 0:
 		element.visible = false
 	else:
-		var playerVelocity = get_velocity()
-		var playerDirection = playerVelocity.normalized() if playerVelocity.normalized().x > 0 or mod != -1 else -playerVelocity.normalized()
-		var rotation_degrees = playerDirection.angle()
+		var velocity = get_velocity()
+		var direction = velocity.normalized()
+		var rotation_degrees = direction.angle()
 		element.visible = true
-		element.rotation = rotation_degrees
+		element.rotation = rotation_degrees * mod
 
 func bouncingLogic(delta):
 	if state == States.PUNCHED and !is_on_floor() and punchedTime > 2:
@@ -190,6 +192,10 @@ func standPosition():
 	bounceDivisor = 1
 
 func recieve_damage(multiplier, vector, damage):
+	# when the player recieve damage it will check if its colliding with a hitbox
+		# if its still colliding with a hitbox it will set attackable as false
+		# else it will be attackable again
+	
 	if state == States.LEDGE:
 		flagLedging = false
 		porposefull_unledged = true
@@ -197,6 +203,7 @@ func recieve_damage(multiplier, vector, damage):
 		resetLedge = true
 		ledgeResetTimer = 0.0
 		jumpCount = 1
+	
 	bounceDivisor = 1
 	life += damage
 	var sum_to_damage = ((4.0 / 100.0) * life)
@@ -207,20 +214,32 @@ func recieve_damage(multiplier, vector, damage):
 			punchedTime = 1 + sum_to_damage
 		else:
 			punchedTime = 4
+		
 	if vector.x > 0.0:
 		$CollisionShape2D.scale.x = -1
 	else:
 		$CollisionShape2D.scale.x = 1
 	velocity.x = vector.x * life
 	velocity.y = vector.y * life
-
-	collision_layer = avoid_layer #
-	collision_mask = avoid_mask #
-	isActive = false #
-	state = States.PUNCHED #
-	dash_timer = 0.0 #
+	
+	state = States.PUNCHED
+	direction = velocity.normalized()
+	
+	collision_layer = avoid_layer
+	collision_mask = avoid_mask
+	dash_timer = 0.0
 	attackable = false
+	isActive = false
 	$Sprite2D.modulate.a = 0.8
+	
+	
+	\"\"\"
+	if not get_tree().paused:
+		get_tree().paused = true
+		if damage > 5:
+			await get_tree().create_timer(0.1).timeout
+		get_tree().paused = false
+	\"\"\"
 
 func inputControllers():
 	if device_id == 0:
@@ -241,7 +260,7 @@ func downedLogic():
 		isActive = false
 	if direction.x > 0.8 or direction.x < -0.8:
 		attackable = true
-		roll() # correct
+		roll()
  
 func inputMovement():
 	#shieldDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
@@ -259,19 +278,21 @@ func inputMovement():
 	if (axisDirection.x < -0.8):
 		axisDirection.x = -1
 	
-	shieldDirection = axisDirection
 	
-	if !isWalking:
-		direction = axisDirection
+	shieldDirection = axisDirection
+	if state != States.SHIELDING:
+		if !isWalking:
+			direction = axisDirection
+		else:
+			direction = axisDirection / 2.1
 	else:
-		direction = axisDirection / 2.1
+		direction = Vector2(0, 0)
 	tilt = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_X), -Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_Y))
 
-func shieldLogic(delta):
+func shieldLogic():
 	if shield_input and is_on_floor() and isActive:
 		state = States.SHIELDING
 		velocity.x = 0
-		# $Sprite2D.modulate.a = 0.5
 
 func crouchLogic():
 	if direction.y < -0.6 and direction.x < 0.2 and direction.x > -0.2 and is_on_floor():
@@ -307,7 +328,6 @@ func activeReset(delta):
 func shieldRoll():
 	if state == States.SHIELDING and (shieldDirection.x > 0.8 or shieldDirection.x < -0.8) and (shieldDirection.y < 0.8 and shieldDirection.y > -0.8) and canRoll:
 		canRoll = false
-		print(direction.x)
 		roll()
 	if state == States.SHIELDING and (shieldDirection.y > 0.8 or shieldDirection.y < -0.8) and (shieldDirection.x < 0.8 and shieldDirection.x > -0.8) and canRoll:
 		canRoll = false
@@ -406,19 +426,19 @@ func floorAttacks():
 		if (direction.x >= 0.2 or direction.x <= -0.2):
 			if basic_attack_input and basic_attack_flag:
 				basic_attack_flag = false
-				baseTiltAttack(States.SIDETILT, true)
+				sideTiltAttack()
 
 		if ((state == States.WALKING or state == States.IDLE or state == States.CROUCHING) and (tilt.x < -0.6 or tilt.x > 0.6) and canTilt) and state != States.SHIELDING:
 			if state == States.IDLE:
 				last_direction = tilt.x
-				baseTiltAttack(States.SIDETILT, true)
+			sideTiltAttack()
 
 		if ((state == States.CROUCHING and basic_attack_input) or is_on_floor() and tilt.y < -0.6) and canTilt:
 			velocity.x = 0
-			baseTiltAttack(States.DOWNTILT, false)
+			downTiltAttack()
 
 		if (((direction.y > 0.5 and basic_attack_input) or is_on_floor() and tilt.y > 0.6) and canTilt):
-			baseTiltAttack(States.UPTILT, false)
+			upTiltAttack()
 	elif (state == States.RUNNING and (basic_attack_input or (tilt.x < -0.6 or tilt.x > 0.6))) and state != States.SHIELDING:
 		dashAttack()
 
@@ -496,6 +516,7 @@ func ledgeLogic(delta):
 		fastfall_window = false
 		$FastFalling.texture = load(\"\")
 		
+		# grab ledge a la derecha esta bugeado
 		if direction.y <= -0.5 or condition_side:
 			state = States.FALLING
 			
@@ -514,48 +535,66 @@ func ledgeLogic(delta):
 		resetLedge = false
 
 # Attacks / movements ------------------------------------------------------------------------------
-func avoid_generic(playerState, active, walking):
-	resetAvoid(false)
-	state = playerState
-	isActive = active
-	dash_timer = 0.0
-	isWalking = walking
-
-func set_avoid_collisions(collide):
-	if collide:
-		collision_layer = starting_layer
-		collision_mask = starting_mask
-	else:
-		collision_layer = avoid_layer
-		collision_mask = avoid_mask
-
 func baseAirAttack(playerState):
-	avoid_generic(playerState, false, false)
+	collision_layer = avoid_layer
+	collision_mask = avoid_mask
+	isActive = false
+	state = playerState
+	dash_timer = 0.0
 	canTilt = false
 	canAttack = false
+	
 
-func baseTiltAttack(playerState, go_forward):
-	avoid_generic(playerState, false, false)
+func sideTiltAttack():
+	state = States.SIDETILT
+	isActive = false
+	dash_timer = 0.0
+	isWalking = false
 	velocity.x = 0
-	if go_forward:
-		velocity.x = 100 * last_direction
+	velocity.x = 100 * last_direction
 	canTilt = false
 
 func avoid():
-	avoid_generic(States.AVOID, false, true)
+	collision_layer = avoid_layer
+	collision_mask = avoid_mask
+	state = States.AVOID
+	isActive = false
+	dash_timer = 0.0
+	isWalking = true
 	$Sprite2D.modulate.a = 0.5
-
+	
 func roll():
-	avoid_generic(States.ROLLING, false, true)
+	collision_layer = avoid_layer
+	collision_mask = avoid_mask
+	var movementDirection = direction
+	if state == States.SHIELDING:
+		movementDirection = shieldDirection
+	state = States.ROLLING
 	$Sprite2D.modulate.a = 0.5
-	if direction.x > 0.8:
+	isActive = false
+	dash_timer = 0.0
+	isWalking = true
+	if movementDirection.x > 0.8:
 		last_direction = 1
-	elif direction.x < -0.8:
+	elif movementDirection.x < -0.8:
 		last_direction = -1
-		
-		
 	velocity.x = 0
 	velocity.x = 600 * last_direction
+
+func upTiltAttack():
+	state = States.UPTILT
+	isActive = false
+	dash_timer = 0.0
+	isWalking = false
+	canTilt = false
+	
+func downTiltAttack():
+	state = States.DOWNTILT
+	velocity.x = 0
+	isActive = false
+	dash_timer = 0.0
+	isWalking = false
+	canTilt = false
 
 func dashAttack():
 	isActive = false
@@ -570,23 +609,24 @@ func resetDashAttack(dash_timer):
 			state = States.IDLE
 			isWalking = true
 			isActive = true
-
-func generic_reset(playerState, walking, active):
-	collision_layer = starting_layer
-	collision_mask = starting_mask
-	state = playerState
-	isWalking = true
-	isActive = true
-
+		
 func resetNeutralAir(dash_timer):
 	if state == States.NEUTRAL_AIR:
 		if dash_timer >= 0.5 or is_on_floor():
-			generic_reset(States.FALLING, true, true)
+			collision_layer = starting_layer
+			collision_mask = starting_mask
+			state = States.FALLING
+			isWalking = true
+			isActive = true
 
 func resetDownAir(dash_timer):
 	if state == States.DOWN_AIR:
 		if dash_timer >= 0.4 or is_on_floor():
-			generic_reset(States.FALLING, true, true)
+			collision_layer = starting_layer
+			collision_mask = starting_mask
+			state = States.FALLING
+			isWalking = true
+			isActive = true
 
 func resetSideTilt(dash_timer):
 	if state == States.SIDETILT:
@@ -596,17 +636,29 @@ func resetSideTilt(dash_timer):
 func resetUpAir(dash_timer):
 	if state == States.UP_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
-			generic_reset(States.FALLING, true, true)
-
+			collision_layer = starting_layer
+			collision_mask = starting_mask
+			state = States.FALLING
+			isWalking = true
+			isActive = true
+		
 func resetForwardAir(dash_timer):
 	if state == States.FORWARD_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
-			generic_reset(States.FALLING, true, true)
+			collision_layer = starting_layer
+			collision_mask = starting_mask
+			state = States.FALLING
+			isWalking = true
+			isActive = true
 
 func resetBackAir(dash_timer):
 	if state == States.BACK_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
-			generic_reset(States.FALLING, true, true)
+			collision_layer = starting_layer
+			collision_mask = starting_mask
+			state = States.FALLING
+			isWalking = true
+			isActive = true
 
 func resetUpTilt(dash_timer):
 	if state == States.UPTILT:
@@ -655,9 +707,11 @@ func resetAvoid(dash_timer):
 			
 func resetPunched(dash_timer):
 	if state == States.PUNCHED:
-		rotate_to_direction($Sprite2D, -1)
+		
+		print(direction.x)
 		bouncing = true
 		if dash_timer >= 0.2:
+			rotate_to_direction($Sprite2D, -1)		
 			if punchedTime < 0.5:
 				collision_layer = starting_layer
 				collision_mask = starting_mask
@@ -667,7 +721,7 @@ func resetPunched(dash_timer):
 				collision_layer = starting_layer
 				collision_mask = starting_mask
 				attackable = true
-				
+			
 			if punchedTime > 0.5 and velocity.length() < 20 or punchedTime > 0.5 and dash_timer >= punchedTime/2:
 				isActive = true
 				state = States.DOWNED
@@ -1005,7 +1059,7 @@ tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [43]
+"values": [42]
 }
 
 [sub_resource type="Animation" id="Animation_pf5cd"]
@@ -1223,6 +1277,7 @@ _data = {
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
+collision_mask = 3
 floor_snap_length = 0.0
 script = SubResource("GDScript_yv2bm")
 

@@ -28,7 +28,6 @@ collision_mask = 27
 script = ExtResource("4_ft6to")
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="Respawn"]
-visible = false
 position = Vector2(1, -936)
 shape = SubResource("RectangleShape2D_xw33e")
 debug_color = Color(0.92549, 0, 0.678431, 0.419608)
@@ -57,12 +56,15 @@ position = Vector2(0, -1506)
 
 [node name="Player2" parent="." instance=ExtResource("1_eip41")]
 position = Vector2(411, 309)
+collision_mask = 3
 player_id = 2
 avoid_layer = 16
 avoid_mask = 17
 
 [node name="Player" parent="." instance=ExtResource("1_eip41")]
 position = Vector2(-411, 309)
+collision_mask = 3
+device_id = 2
 player_id = 1
 avoid_layer = 8
 avoid_mask = 9
@@ -86,7 +88,7 @@ max_zoom = 1
 position = Vector2(-4, 500)
 
 [node name="Ledge" type="Area2D" parent="Floor"]
-position = Vector2(-546.905, 0)
+position = Vector2(-546.905, -37.46)
 collision_layer = 27
 collision_mask = 27
 script = ExtResource("2_vioio")
@@ -97,7 +99,7 @@ position = Vector2(0, -14.54)
 shape = SubResource("RectangleShape2D_1l3iv")
 
 [node name="Ledge2" type="Area2D" parent="Floor"]
-position = Vector2(546.914, 0)
+position = Vector2(546.914, -37.459)
 collision_layer = 27
 collision_mask = 27
 script = ExtResource("2_vioio")
@@ -108,5 +110,4 @@ position = Vector2(0, -14.54)
 shape = SubResource("RectangleShape2D_1l3iv")
 
 [node name="Floor" parent="Floor" instance=ExtResource("2_awqle")]
-position = Vector2(0, -4.725)
-scale = Vector2(26.37, 1.835)
+scale = Vector2(26.37, 3.915)

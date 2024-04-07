@@ -14,7 +14,6 @@ func _process(delta):
 	if !targets:
 		return
 
-		
 	var flagPosition = Vector2.ZERO
 	
 	for target in targets:
@@ -29,13 +28,9 @@ func _process(delta):
 		r = r.expand(target.position)
 	
 	r = r.grow_individual(margin.x, margin.y, margin.x, margin.y)
-	var d = max(r.size.x, r.size.y)
+	var d = r.size.length()
 	
-	var z
-	if r.size.x > r.size.y:
-		z = clamp(screen_size.x / r.size.x, min_zoom, max_zoom)
-	else:
-		z = clamp(screen_size.y / r.size.y, min_zoom, max_zoom)
+	var z = clamp(screen_size.length() / d, min_zoom, max_zoom)
 	
 	zoom = lerp(zoom, Vector2.ONE * z, zoom_speed)
 

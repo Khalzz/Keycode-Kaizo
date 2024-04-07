@@ -12,10 +12,18 @@ func _process(delta):
 		else:
 			$"../Sprite2D".flip_h = true
 	else:
-		if direction > 0.0:
-			$"../Sprite2D".flip_h = false
+		if state == States.PUNCHED:
+			var velocityPlayer = $"..".get_velocity()
+			var directionPlayer = velocityPlayer.normalized()
+			if directionPlayer.x > 0.0:
+				$"../Sprite2D".flip_h = true
+			else:
+				$"../Sprite2D".flip_h = false
 		else:
-			$"../Sprite2D".flip_h = true
+			if direction > 0.0:
+				$"../Sprite2D".flip_h = false
+			else:
+				$"../Sprite2D".flip_h = true
 	
 	match state:
 		States.IDLE:
