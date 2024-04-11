@@ -20,10 +20,16 @@ func _process(delta):
 			else:
 				$"../Sprite2D".flip_h = false
 		else:
-			if direction > 0.0:
-				$"../Sprite2D".flip_h = false
+			if state == States.SHIELDKNOCKBACKED:
+				if get_parent().velocity.x < 0:
+					$"../Sprite2D".flip_h = false
+				else:
+					$"../Sprite2D".flip_h = true
 			else:
-				$"../Sprite2D".flip_h = true
+				if direction > 0.0:
+					$"../Sprite2D".flip_h = false
+				else:
+					$"../Sprite2D".flip_h = true
 	
 	match state:
 		States.IDLE:
@@ -60,6 +66,8 @@ func _process(delta):
 			play('BAIR')
 		States.SHIELDING:
 			play('SHIELDING')
+		States.SHIELDKNOCKBACKED:
+			play('SHIELDKNOCKBACK')
 		States.DOWNED:
 			play('DOWNED')
 		States.STANDING:

@@ -9,7 +9,6 @@ extends Camera2D
 var targets = []  # Array of targets to be tracked.
 
 @onready var screen_size = get_viewport_rect().size
-
 func _process(delta):
 	if !targets:
 		return
@@ -41,3 +40,6 @@ func add_target(t):
 func remove_target(t):
 	if t in targets:
 		targets.erase(t)
+
+func zoom_change(value):
+	max_zoom = value

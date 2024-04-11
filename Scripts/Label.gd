@@ -35,13 +35,33 @@ func _process(delta):
 			text = str("DOWNTILT")
 		States.UPTILT:
 			text = str("UPTILT")
-		States.DOWN_AIR:
-			text = str("DOWN_AIR")
-		States.UP_AIR:
-			text = str("UP_AIR")
 		States.SIDETILT:
 			text = str("SIDETILT")
+		States.DOWN_AIR:
+			text = str("DOWN AIR")
+		States.UP_AIR:
+			text = str("UP AIR")
+		States.FORWARD_AIR:
+			text = str("FORWARD AIR")
+		States.BACK_AIR:
+			text = str("BACK AIR")
 		States.SHIELDING:
 			text = str("SHIELDING")
+		States.SHIELDKNOCKBACKED:
+			text = str("SHIELD KNOCKBACKED")
+		States.DOWNED:
+			text = str("DOWNED")
+		States.STANDING:
+			text = str("STANDING")
+		States.ROLLING:
+			text = str("ROLLING")
+		States.AVOID:
+			text = str("AVOID")
 		States.PUNCHED:
 			text = str("PUNCHED")
+		States.LEDGE:
+			text = str("LEDGE")
+		States.GRABING:
+			text = str("GRABING")
+		States.GRAB:
+			text = str("GRAB")

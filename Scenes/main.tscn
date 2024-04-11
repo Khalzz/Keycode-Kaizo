@@ -55,17 +55,27 @@ scale = Vector2(7.245, 1)
 [node name="PunchingBag" parent="." instance=ExtResource("3_o6s3b")]
 position = Vector2(0, -1506)
 
-[node name="Player2" parent="." instance=ExtResource("1_eip41")]
-position = Vector2(411, 309)
-player_id = 2
-avoid_layer = 16
-avoid_mask = 17
-
-[node name="Player" parent="." instance=ExtResource("1_eip41")]
+[node name="Player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
 position = Vector2(-411, 309)
 player_id = 1
+debugging = true
+camera = NodePath("../Camera2D")
+r = 1.0
+g = 0.7
+b = 0.7
 avoid_layer = 8
 avoid_mask = 9
+
+[node name="Player2" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
+position = Vector2(411, 309)
+player_id = 2
+debugging = true
+camera = NodePath("../Camera2D")
+r = 0.7
+g = 0.7
+b = 1.0
+avoid_layer = 16
+avoid_mask = 17
 
 [node name="HUD" parent="." instance=ExtResource("5_y0ins")]
 

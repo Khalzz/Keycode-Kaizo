@@ -1,7 +1,6 @@
-[gd_scene load_steps=52 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=51 format=3 uid="uid://btnlv2vwv2vd8"]
 
 [ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
-[ext_resource type="PackedScene" uid="uid://drpurg4jnpt3i" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.tscn" id="2_w5v7k"]
 [ext_resource type="PackedScene" uid="uid://b6b0y5nbglke3" path="res://Scenes/Characters/hitboxes/Test/jab_hitbox.tscn" id="13_gc2vs"]
 [ext_resource type="PackedScene" uid="uid://cqvv4kuglti0i" path="res://Scenes/Characters/hitboxes/Test/dash_attack_hitbox.tscn" id="14_h4xt5"]
 [ext_resource type="Script" path="res://Scenes/Characters/Controller.gd" id="14_vt1v8"]
@@ -28,16 +27,12 @@ script/source = "extends CharacterBody2D
 @export var debugging = false
 @export var camera = Camera2D
 
-@export var r = 0.0
-@export var g = 0.0
-@export var b = 0.0
-
 @export var avoid_layer = 0
 @export var avoid_mask = 0
 
 # Other data
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\") * 3
-enum States {IDLE, WALKING, RUNNING, JUMPING, FALLING, JAB, DASH_ATTACK, NEUTRAL_AIR, CROUCHING, DOWNTILT, UPTILT, SIDETILT, DOWN_AIR, UP_AIR, FORWARD_AIR, BACK_AIR, SHIELDING, SHIELDKNOCKBACKED, DOWNED, STANDING, ROLLING, AVOID, PUNCHED, LEDGE, GRAB, GRABING}
+enum States {IDLE, WALKING, RUNNING, JUMPING, FALLING, JAB, DASH_ATTACK, NEUTRAL_AIR, CROUCHING, DOWNTILT, UPTILT, SIDETILT, DOWN_AIR, UP_AIR, FORWARD_AIR, BACK_AIR, SHIELDING, SHIELDKNOCKBACKED, DOWNED, STANDING, ROLLING, AVOID, PUNCHED, LEDGE}
 
 var state = States.IDLE
 
@@ -78,7 +73,6 @@ var canRoll = true
 var jump_input
 var shield_input
 var basic_attack_input
-var grab_input
 var basic_attack_flag = true
 
 # Recieving Damage
@@ -109,29 +103,20 @@ var fastfall_window = false
 var fastfalling_timer = 0.0
 
 func _ready():
-	if GlobalController.players.size() == 1:
-		if player_id == 1:
-			device_id = GlobalController.players[0]
-		else:
-			device_id = -1
+	if player_id == 1:
+		$Sprite2D.modulate.r = 1
+		$Sprite2D.modulate.g = 0.7
+		$Sprite2D.modulate.b = 0.7
 	else:
-		device_id = GlobalController.players[player_id - 1]
+		$Sprite2D.modulate.r = 0.7
+		$Sprite2D.modulate.g = 0.7
+		$Sprite2D.modulate.b = 1
+	device_id = GlobalController.players[player_id - 1]
 	starting_layer = collision_layer
 	starting_mask = collision_mask
 	hud = get_node(\"../HUD\")
 	
 func _process(delta):
-	if state == States.SHIELDING and dash_timer <= 0.5:
-		$Sprite2D.modulate.r = 0.9
-		$Sprite2D.modulate.g = 0.9
-		$Sprite2D.modulate.b = 0.9
-	else: 
-		$Sprite2D.modulate.r = r
-		$Sprite2D.modulate.g = g
-		$Sprite2D.modulate.b = b
-	if camera.max_zoom > 1 and state != States.SHIELDKNOCKBACKED: 
-		camera.max_zoom = lerpf(camera.max_zoom, 1.0, 0.001)
-		camera.margin = lerp(camera.margin, Vector2(400, 200), 0.001)
 	rotate_to_direction($Facing, 1)
 	hud.setLive(life, player_id)
 
@@ -151,7 +136,6 @@ func _physics_process(delta):
 			shieldLogic(delta)
 			shieldRoll()
 			ledgeLogic(delta)
-			grabLogic(delta)
 			if state != States.LEDGE:
 				fastfalling(delta)
 		else:
@@ -159,32 +143,7 @@ func _physics_process(delta):
 	else:
 		activeReset(delta)
 	bouncingLogic(delta)
-	grabingLogic(delta)
 
-func grabingLogic(delta):
-	# This is buggy
-	if state == States.GRABING:
-		var axisDirection = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
-		if device_id == -1:
-			axisDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
-			
-		if axisDirection.x < -0.8 or axisDirection.x > 0.8 or axisDirection.y < -0.8 or axisDirection.y > 0.8:
-			state == States.IDLE
-			isActive = true
-
-func grabLogic(delta):
-	if grab_input and is_on_floor():
-		state = States.GRAB
-		isActive = false
-		dash_timer = 0.0
-		velocity.x = 0
-
-func resetGrab(delta):
-	if state == States.GRAB:
-		if dash_timer >= 1:
-			state == States.IDLE
-			isActive = true
-			
 func basicAttackTrueValue():
 	if !basic_attack_flag and !basic_attack_input:
 		basic_attack_flag = true
@@ -201,7 +160,7 @@ func fastfalling(delta):
 			fastfall_window = false
 
 func rotate_to_direction(element, mod):
-	if (velocity.length() == 0 and mod > 0 and debugging == false): 
+	if (velocity.length() == 0 and mod > 0) or debugging == false: 
 		element.visible = false
 	else:
 		var playerVelocity = get_velocity()
@@ -265,16 +224,14 @@ func recieve_damage(multiplier, vector, damage):
 	$Sprite2D.modulate.a = 0.8
 
 func inputControllers():
-	if device_id == -1:
+	if device_id == 0:
 		jump_input = Input.is_action_pressed(\"jump\")
 		shield_input = Input.is_action_pressed(\"shield\")
 		basic_attack_input = Input.is_action_pressed(\"basic_attack\")
-		grab_input = Input.is_action_pressed(\"grab\")
 	else:
 		jump_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_Y) or Input.is_joy_button_pressed(device_id, JOY_BUTTON_X)
 		shield_input = (Input.get_joy_axis(device_id, JOY_AXIS_TRIGGER_LEFT) > 0.8 or Input.get_joy_axis(device_id, JOY_AXIS_TRIGGER_RIGHT) > 0.8)
 		basic_attack_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_A) or (!is_on_floor() and Input.is_joy_button_pressed(device_id, JOY_BUTTON_RIGHT_SHOULDER))
-		grab_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_RIGHT_SHOULDER)
 	
 func downedLogic():
 	velocity.x = 0
@@ -290,7 +247,7 @@ func downedLogic():
 func inputMovement():
 	#shieldDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
 	var axisDirection = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
-	if device_id == -1:
+	if device_id == 0:
 		axisDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
 	
 	if (axisDirection.x < 0.3 and axisDirection.x > -0.3):
@@ -316,9 +273,6 @@ func shieldLogic(delta):
 		if state != States.SHIELDING:
 			state = States.SHIELDING
 			velocity.x = 0
-			dash_timer = 0.0
-		else:
-			dash_timer += delta
 		# $Sprite2D.modulate.a = 0.5
 
 func crouchLogic():
@@ -352,11 +306,11 @@ func activeReset(delta):
 	resetAvoid(dash_timer)
 	resetPunched(dash_timer)
 	resetShieldKnockBack(dash_timer)
-	resetGrab(dash_timer)
 
 func shieldRoll():
 	if state == States.SHIELDING and (shieldDirection.x > 0.8 or shieldDirection.x < -0.8) and (shieldDirection.y < 0.8 and shieldDirection.y > -0.8) and canRoll:
 		canRoll = false
+		print(direction.x)
 		roll()
 	if state == States.SHIELDING and (shieldDirection.y > 0.8 or shieldDirection.y < -0.8) and (shieldDirection.x < 0.8 and shieldDirection.x > -0.8) and canRoll:
 		canRoll = false
@@ -612,16 +566,17 @@ func dashAttack():
 	dash_timer = 0.0
 	velocity.x = dash_distance * last_direction
 
+func shieldKnockBackLogic():
+	camera.max_zoom = 10
+
 func shieldKnockBack(knockDirection, knockValue):
-	Engine.set_time_scale(0.6)
 	state = States.SHIELDKNOCKBACKED
-	if is_on_floor():
-		$CPUParticles2D3.emitting = true
+	$CPUParticles2D3.emitting = true
 	if knockDirection > 0:
-		velocity.x = lerp(knockValue, 0, 0.4)
+		velocity.x = lerp(knockValue, 0, 0.5)
 		last_direction = -1
 	else:
-		velocity.x = lerp(-knockValue, 0, 0.4)
+		velocity.x = lerp(-knockValue, 0, 0.2)
 		last_direction = 1
 	dash_timer = 0.0
 	isActive = false
@@ -629,21 +584,14 @@ func shieldKnockBack(knockDirection, knockValue):
 # RESETERS -----------------------------------------------------------------------------------------
 func resetShieldKnockBack(dash_timer):
 	if state == States.SHIELDKNOCKBACKED:
-		camera.max_zoom = lerpf(camera.max_zoom, 20.0, 0.01)
-		camera.margin = Vector2(200, 100)
-		if dash_timer >= 0.2 && is_on_floor():
+		if dash_timer >= 0.2:
 			$CPUParticles2D3.emitting = false
 			#velocity.x = 0
 			state = States.IDLE
 			isActive = true
 			velocity.x = 0
 			Engine.set_time_scale(1.0)
-		elif !is_on_floor() or state != States.SHIELDKNOCKBACKED:
-			$CPUParticles2D3.emitting = false
-			state = States.FALLING
-			isActive = true
-			velocity.x = 0
-			Engine.set_time_scale(1.0)
+			camera.max_zoom = 1.0
 
 func resetDashAttack(dash_timer):
 	if state == States.DASH_ATTACK:
@@ -715,7 +663,7 @@ func resetStanding(dash_timer):
 			collision_mask = starting_mask
 			isActive = true
 			state = States.IDLE
-
+		
 func resetRolling(dash_timer):
 	if state == States.ROLLING:
 		if dash_timer >= 0.2:
@@ -748,10 +696,10 @@ func resetPunched(dash_timer):
 				collision_layer = starting_layer
 				collision_mask = starting_mask
 				attackable = true
-			if punchedTime > 0.5 and (velocity.x < 0.5 and velocity.x > -0.5) or punchedTime > 0.5 and dash_timer >= punchedTime/2:
+				
+			if punchedTime > 0.5 and velocity.length() < 20 or punchedTime > 0.5 and dash_timer >= punchedTime/2:
 				isActive = true
 				state = States.DOWNED
-				$Sprite2D.rotation = 0
 			if (dash_timer >= punchedTime and dash_timer < 0.3) or is_on_floor():
 				standPosition()
 				isActive = true
@@ -1003,10 +951,10 @@ tracks/1/path = NodePath("JAB_HITBOX:monitoring")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.1, 0.19),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.11),
+"transitions": PackedFloat32Array(1, 1),
 "update": 1,
-"values": [false, true, false]
+"values": [false, true]
 }
 
 [sub_resource type="Animation" id="Animation_c8ppk"]
@@ -1354,9 +1302,6 @@ text = "Jumping"
 horizontal_alignment = 1
 script = ExtResource("1_sd273")
 
-[node name="GrabHitbox" parent="." instance=ExtResource("2_w5v7k")]
-visible = false
-
 [node name="JAB_HITBOX" parent="." instance=ExtResource("13_gc2vs")]
 visible = false
 position = Vector2(0, -8)
@@ -1414,7 +1359,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 2
 vframes = 23
-frame = 40
+frame = 35
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource("14_vt1v8")
@@ -1438,7 +1383,7 @@ offset = Vector2(392.77, 0)
 modulate = Color(0.67451, 0.6, 0.513726, 1)
 position = Vector2(0, 41)
 emitting = false
-amount = 1000
+amount = 500
 one_shot = true
 explosiveness = 0.26
 randomness = 1.0

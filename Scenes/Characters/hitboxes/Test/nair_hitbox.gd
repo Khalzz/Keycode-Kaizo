@@ -18,9 +18,12 @@ func _process(delta):
 			if (element != get_parent()): # I HAVE TO CHECK IF IT HAVES THE FUNCTION RECIEVE DAMAGE
 				if element.has_method("recieve_damage"):
 					if element.attackable == true:
-						var direccion =   get_parent().global_position - element.global_position
-						element.recieve_damage(10, Vector2(scale.x * 8, -2 ), 7.2)
-						element.timer = 0.0
-						element.attackable = false
-
 						
+						if element.state == States.SHIELDING:
+							$"..".shieldKnockBack(-$"..".last_direction, 1500)
+							element.shieldKnockBack($"..".last_direction, 1500)
+						else:
+							var direccion =   get_parent().global_position - element.global_position
+							element.recieve_damage(10, Vector2(scale.x * 8, -2 ), 7.2)
+							element.timer = 0.0
+							element.attackable = false
