@@ -19,9 +19,10 @@ func _process(delta):
 					get_parent().state = States.GRABING
 					# get_parent().camera.max_zoom = lerpf(get_parent().camera.max_zoom, 20.0, 0.01)
 					# get_parent().camera.margin = Vector2(200, 100)
-					element.position.x = $CollisionShape2D.global_position.x
-					element.position.y = $CollisionShape2D.global_position.y
+					element.grabbed_position = $grabbing_pos.global_position
 					element.last_direction = -direction
 					element.isActive = false
+					element.grabbed_flag = true
+					element.state = States.GRABBED
 	#else:
 		# monitoring = false

@@ -3,12 +3,12 @@
 [ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.gd" id="1_kkict"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l34tn"]
-size = Vector2(36, 34)
+size = Vector2(17, 19)
 
 [node name="GrabHitbox" type="Area2D"]
 collision_mask = 3
 script = ExtResource("1_kkict")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(42, -18)
+position = Vector2(25, -30)
 shape = SubResource("RectangleShape2D_l34tn")

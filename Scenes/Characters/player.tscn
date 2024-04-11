@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=54 format=3 uid="uid://btnlv2vwv2vd8"]
 
 [ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
 [ext_resource type="PackedScene" uid="uid://drpurg4jnpt3i" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.tscn" id="2_w5v7k"]
@@ -37,7 +37,7 @@ script/source = "extends CharacterBody2D
 
 # Other data
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\") * 3
-enum States {IDLE, WALKING, RUNNING, JUMPING, FALLING, JAB, DASH_ATTACK, NEUTRAL_AIR, CROUCHING, DOWNTILT, UPTILT, SIDETILT, DOWN_AIR, UP_AIR, FORWARD_AIR, BACK_AIR, SHIELDING, SHIELDKNOCKBACKED, DOWNED, STANDING, ROLLING, AVOID, PUNCHED, LEDGE, GRAB, GRABING}
+enum States {IDLE, WALKING, RUNNING, JUMPING, FALLING, JAB, DASH_ATTACK, NEUTRAL_AIR, CROUCHING, DOWNTILT, UPTILT, SIDETILT, DOWN_AIR, UP_AIR, FORWARD_AIR, BACK_AIR, SHIELDING, SHIELDKNOCKBACKED, DOWNED, STANDING, ROLLING, AVOID, PUNCHED, LEDGE, GRAB, GRABING, GRABBED}
 
 var state = States.IDLE
 
@@ -51,6 +51,11 @@ var acceleration = 2000
 var max_speed = 600.0
 var last_direction = 1
 var jump_direction = 0
+
+#grabbing/grabbed
+var grabbed_position = Vector2.ZERO
+var end_pos = Vector2.ZERO
+var grabbed_flag = false
 
 # Jumping
 const JUMP_VELOCITY = -700.0
@@ -160,15 +165,26 @@ func _physics_process(delta):
 		activeReset(delta)
 	bouncingLogic(delta)
 	grabingLogic(delta)
+	grabbedLogic(delta)
+
+func grabbedLogic(delta):
+	if state == States.GRABBED:
+		if grabbed_flag:
+			if last_direction > 0:
+				end_pos = Vector2(grabbed_position.x - $GrabHitbox/grabbed_pos.position.x, grabbed_position.y - $GrabHitbox/grabbed_pos.position.y)
+			else:
+				end_pos = Vector2(grabbed_position.x + $GrabHitbox/grabbed_pos.position.x, grabbed_position.y - $GrabHitbox/grabbed_pos.position.y)				
+			grabbed_flag = false
+		position = end_pos
 
 func grabingLogic(delta):
 	# This is buggy
 	if state == States.GRABING:
-		var axisDirection = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
+		var grabDirection = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
 		if device_id == -1:
-			axisDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
+			grabDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
 			
-		if axisDirection.x < -0.8 or axisDirection.x > 0.8 or axisDirection.y < -0.8 or axisDirection.y > 0.8:
+		if grabDirection.x < -0.8 or grabDirection.x > 0.8 or grabDirection.y < -0.8 or grabDirection.y > 0.8:
 			state == States.IDLE
 			isActive = true
 
@@ -963,6 +979,37 @@ tracks/0/keys = {
 "values": [24]
 }
 
+[sub_resource type="Animation" id="Animation_u81ag"]
+resource_name = "GRABBED"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [47]
+}
+
+[sub_resource type="Animation" id="Animation_jt44u"]
+resource_name = "GRABBING"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [46]
+}
+
 [sub_resource type="Animation" id="Animation_t2o3i"]
 resource_name = "IDLE"
 length = 2.0
@@ -1299,6 +1346,8 @@ _data = {
 "DOWN_AIR": SubResource("Animation_wlqvv"),
 "FAIR": SubResource("Animation_0bld2"),
 "FALLING": SubResource("Animation_ianko"),
+"GRABBED": SubResource("Animation_u81ag"),
+"GRABBING": SubResource("Animation_jt44u"),
 "IDLE": SubResource("Animation_t2o3i"),
 "JAB": SubResource("Animation_chdis"),
 "JUMPING": SubResource("Animation_c8ppk"),
@@ -1355,7 +1404,12 @@ horizontal_alignment = 1
 script = ExtResource("1_sd273")
 
 [node name="GrabHitbox" parent="." instance=ExtResource("2_w5v7k")]
-visible = false
+
+[node name="grabbing_pos" type="Node2D" parent="GrabHitbox"]
+position = Vector2(17.78, -36.49)
+
+[node name="grabbed_pos" type="Node2D" parent="GrabHitbox"]
+position = Vector2(10, -34)
 
 [node name="JAB_HITBOX" parent="." instance=ExtResource("13_gc2vs")]
 visible = false
@@ -1413,8 +1467,8 @@ position = Vector2(0, 3)
 scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 2
-vframes = 23
-frame = 40
+vframes = 24
+frame = 46
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource("14_vt1v8")
