@@ -1,5 +1,8 @@
 extends Button
 
+func _ready():
+	grab_focus()
+
 func _process(delta):
 	pressed.connect(self._button_pressed)
 	

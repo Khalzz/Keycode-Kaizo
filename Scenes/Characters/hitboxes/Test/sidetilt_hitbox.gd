@@ -25,7 +25,7 @@ func _process(delta):
 								element.shieldKnockBack($"..".last_direction, 1500)
 						else:
 							var direccion =   get_parent().global_position - element.global_position
-							element.recieve_damage(10, Vector2(scale.x * 5, -5), 7.2)
+							element.recieve_damage(10, Vector2(scale.x * 5, -5), 7.2, false)
 							element.timer = 0.0
 							element.attackable = false
 				

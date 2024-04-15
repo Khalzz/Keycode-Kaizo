@@ -15,14 +15,17 @@ func _process(delta):
 	if state == States.GRAB:
 		for element in get_overlapping_bodies():
 			if (element != get_parent()): # I HAVE TO CHECK IF IT HAVES THE FUNCTION RECIEVE DAMAGE
-				if element.has_method("recieve_damage"):
+				if element.has_method("recieve_damage") and element.state != States.ROLLING and element.state != States.AVOID:
+					get_parent().canThrow = false
+					get_parent().canGrab = false
+					get_parent().dash_timer = 0.0
 					get_parent().state = States.GRABING
-					# get_parent().camera.max_zoom = lerpf(get_parent().camera.max_zoom, 20.0, 0.01)
-					# get_parent().camera.margin = Vector2(200, 100)
+					get_parent().grabbed_player = element
 					element.grabbed_position = $grabbing_pos.global_position
 					element.last_direction = -direction
 					element.isActive = false
 					element.grabbed_flag = true
 					element.state = States.GRABBED
-	#else:
-		# monitoring = false
+					element.dash_timer = 0.0					
+					element.timer = 0.0
+					element.grabbing_player = get_parent()

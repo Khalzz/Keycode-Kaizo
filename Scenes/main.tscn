@@ -58,7 +58,6 @@ position = Vector2(0, -1506)
 [node name="Player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
 position = Vector2(-411, 309)
 player_id = 1
-debugging = true
 camera = NodePath("../Camera2D")
 r = 1.0
 g = 0.7
@@ -69,7 +68,6 @@ avoid_mask = 9
 [node name="Player2" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
 position = Vector2(411, 309)
 player_id = 2
-debugging = true
 camera = NodePath("../Camera2D")
 r = 0.7
 g = 0.7

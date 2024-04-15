@@ -1,4 +1,4 @@
-[gd_scene load_steps=57 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=55 format=3 uid="uid://btnlv2vwv2vd8"]
 
 [ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
 [ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="1_x6t3h"]
@@ -57,14 +57,7 @@ var jump_direction = 0
 var grabbed_position = Vector2.ZERO
 var end_pos = Vector2.ZERO
 var grabbed_flag = false
-var grabbed_player = null # for the grabber will have value
-var grabbing_player = null # for the grabbed will have value
-var canThrow = true
-var canGrab = true
-var mash_count = 0
-
-enum MashDirections {LEFT, RIGHT, UP, DOWN}
-var last_mash_dir = null
+var grabbed_player = null
 
 # Jumping
 const JUMP_VELOCITY = -700.0
@@ -175,28 +168,6 @@ func _physics_process(delta):
 	bouncingLogic(delta)
 	grabingLogic(delta)
 	grabbedLogic(delta)
-	mash()
-	
-func mash():
-	if state == States.GRABBED or state == States.PUNCHED:
-		var mashInput = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
-		if device_id == -1:
-			mashInput = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
-
-		if mashInput.x > 0.5 and round(mashInput.y) == 0 and last_mash_dir != MashDirections.RIGHT:
-			mash_count += 1
-			last_mash_dir = MashDirections.RIGHT
-		elif mashInput.x < -0.5 and round(mashInput.y) == 0 and last_mash_dir != MashDirections.LEFT:
-			mash_count += 1
-			last_mash_dir = MashDirections.LEFT
-		elif mashInput.y > 0.5 and round(mashInput.x) == 0 and last_mash_dir != MashDirections.UP:
-			mash_count += 1
-			last_mash_dir = MashDirections.UP
-		elif mashInput.y < -0.5 and round(mashInput.x) == 0 and last_mash_dir != MashDirections.DOWN:
-			mash_count += 1
-			last_mash_dir = MashDirections.DOWN
-	else:
-		mash_count = 0
 
 func grabbedLogic(delta):
 	# add the posibility to mash untill the enemy drops you
@@ -210,38 +181,38 @@ func grabbedLogic(delta):
 		position = end_pos
 
 func grabingLogic(delta):
-	if state == States.GRABING and canThrow:
+	if state == States.GRABING:
 		camera.max_zoom = lerpf(camera.max_zoom, 20.0, 0.01)
 		camera.margin = lerp(Vector2(400, 200), Vector2(200, 100), 0.01)
 		var grabDirection = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
 		if device_id == -1:
 			grabDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
+			
 		if grabDirection.x < -0.8 or grabDirection.x > 0.8:
-			var fixedVector = Vector2(round(grabDirection.x) * 1000, -300)
-			grabbed_player.punchedTime = 3
-			grabbed_player.grabbed_flag = false
-			grabbed_player.recieve_damage(0, fixedVector, 2, true)
+			var fixedVector = Vector2(round(grabDirection.x) * 1000, -300) 
+			grabbed_player.recieve_damage(0, fixedVector, 8, true)
 			state == States.IDLE
 			isActive = true
-		elif grabDirection.y < -0.8: # down
+		elif grabDirection.y < -0.8:
 			## this goes more to the right than to the left
-			var fixedVector = Vector2(50 * -last_direction, -round(grabDirection.y) * 2000)
-			grabbed_player.punchedTime = 3
+			var fixedVector = Vector2(0, -round(grabDirection.y * 1000))
 			grabbed_player.grabbed_flag = false
-			grabbed_player.recieve_damage(0, fixedVector, 4, true)
+			grabbed_player.recieve_damage(0, fixedVector, 10, true)
 			state == States.IDLE
 			isActive = true
-		elif grabDirection.y > 0.8: # up
-			var fixedVector = Vector2(50 * -last_direction, -round(grabDirection.y) * 1100)
+		elif grabDirection.y > 0.8:
+			var fixedVector = Vector2(0, -round(grabDirection.y) * 1000)
+			grabbed_player.punchedTime = 3
+			
 			grabbed_player.grabbed_flag = false
-			grabbed_player.recieve_damage(0, fixedVector, 4, true)
+			grabbed_player.recieve_damage(0, fixedVector, 10, true)
 			state == States.IDLE
 			isActive = true
 	if state != States.GRABING:
 		grabbed_player = null
 
 func grabLogic(delta):
-	if grab_input and is_on_floor() and canGrab:
+	if grab_input and is_on_floor():
 		state = States.GRAB
 		isActive = false
 		dash_timer = 0.0
@@ -249,11 +220,10 @@ func grabLogic(delta):
 
 func resetGrab(delta):
 	if state == States.GRAB:
-		canGrab = false	
-		if dash_timer >= 0.2:
+		if dash_timer >= 1:
 			state == States.IDLE
 			isActive = true
-
+			
 func basicAttackTrueValue():
 	if !basic_attack_flag and !basic_attack_input:
 		basic_attack_flag = true
@@ -280,7 +250,7 @@ func rotate_to_direction(element, mod):
 		element.rotation = rotation_degrees
 
 func bouncingLogic(delta):
-	if state == States.PUNCHED and !is_on_floor() and punchedTime > 2:
+	if state == States.PUNCHED and !is_on_floor() and punchedTime > 2 and grabbed_flag:
 		var collision_info = move_and_collide(velocity * delta)
 		if collision_info:
 			bounceDivisor += 1
@@ -311,21 +281,19 @@ func recieve_damage(multiplier, vector, damage, fixed_vector):
 	bounceDivisor = 1
 	life += damage
 	var sum_to_damage = ((4.0 / 100.0) * life)
-	
+	if damage < 8:
+		punchedTime = 0.5
+	else:
+		if sum_to_damage < 4:
+			punchedTime = 1 + sum_to_damage
+		else:
+			punchedTime = 4
 	if vector.x > 0.0:
 		$CollisionShape2D.scale.x = -1
 	else:
 		$CollisionShape2D.scale.x = 1
-
+		
 	if !fixed_vector:
-		if damage < 8:
-			punchedTime = 0.5
-		else:
-			if sum_to_damage < 4:
-				punchedTime = 1 + sum_to_damage
-			else:
-				punchedTime = 4
-
 		velocity.x = vector.x * life
 		velocity.y = vector.y * life
 	else:
@@ -428,7 +396,6 @@ func activeReset(delta):
 	resetPunched(dash_timer)
 	resetShieldKnockBack(dash_timer)
 	resetGrab(dash_timer)
-	resetGrabbed(dash_timer)
 
 func shieldRoll():
 	if state == States.SHIELDING and (shieldDirection.x > 0.8 or shieldDirection.x < -0.8) and (shieldDirection.y < 0.8 and shieldDirection.y > -0.8) and canRoll:
@@ -493,14 +460,8 @@ func stateReseters():
 	if shieldDirection.x < 0.8 and shieldDirection.x > -0.8 and shieldDirection.y < 0.8 and shieldDirection.y > -0.8:
 		canRoll = true
 		
-	if direction.y < 0.3 and direction.y > -0.3 and direction.x < 0.3 and direction.x > -0.3:
-		if !is_on_floor():
-			can_fastfall = true
-		if !canThrow:
-			canThrow = true
-
-	if !grab_input:
-		canGrab = true
+	if direction.y < 0.3 and direction.y > -0.3 and direction.x < 0.3 and direction.x > -0.3 and !is_on_floor():
+		can_fastfall = true
 
 	if jump_input:
 		if (state == States.FALLING and jumpCount > 0 and canJumpEsp) or is_on_floor() or state == States.LEDGE:
@@ -598,7 +559,6 @@ func GrabLedge(direction_val, position_hitbox, hitboxList, delta):
 			state = States.LEDGE
 			last_direction = direction_val
 		if state == States.LEDGE:
-			jumpCount = 2
 			if flagLedging == false:
 				flagLedging = true
 				ledge_timer = 0.0
@@ -612,6 +572,7 @@ func GrabLedge(direction_val, position_hitbox, hitboxList, delta):
 				isActive = false
 			else:
 				isActive = true
+		jumpCount = 2
 
 func ledgeLogic(delta):
 	var condition_side
@@ -626,15 +587,19 @@ func ledgeLogic(delta):
 		fastfalling_timer = 0.0
 		fastfall_window = false
 		$FastFalling.texture = load(\"\")
+		
 		if direction.y <= -0.5 or condition_side:
 			state = States.FALLING
+			
 			collision_layer = starting_layer
 			collision_mask = starting_mask
+		
 			flagLedging = false
 			porposefull_unledged = true
 			$Sprite2D.modulate.a = 1.0
 			resetLedge = true
 			ledgeResetTimer = 0.0
+
 
 	if ledgeResetTimer > 0.2 and resetLedge:
 		porposefull_unledged = false
@@ -703,14 +668,6 @@ func shieldKnockBack(knockDirection, knockValue):
 	isActive = false
 
 # RESETERS -----------------------------------------------------------------------------------------
-func resetGrabbed(dash_timer):
-	if state == States.GRABBED:
-		if dash_timer >= 2 or mash_count >= 6:
-			grabbed_flag = false
-			isActive = true
-			grabbing_player.state = States.IDLE
-			grabbing_player.isActive = true
-
 func resetShieldKnockBack(dash_timer):
 	if state == States.SHIELDKNOCKBACKED:
 		camera.max_zoom = lerpf(camera.max_zoom, 20.0, 0.01)
@@ -836,7 +793,7 @@ func resetPunched(dash_timer):
 				isActive = true
 				state = States.DOWNED
 				$Sprite2D.rotation = 0
-			if (dash_timer >= punchedTime and dash_timer < 0.3) or is_on_floor() or mash_count >= 5:
+			if (dash_timer >= punchedTime and dash_timer < 0.3) or is_on_floor():
 				standPosition()
 				isActive = true
 				state = States.IDLE
@@ -850,7 +807,7 @@ func coolDownAttack(time, newState, walkable):
 	isActive = true
 "
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_5hfh3"]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0atph"]
 height = 84.0
 
 [sub_resource type="Animation" id="Animation_0sehn"]
@@ -1047,21 +1004,6 @@ tracks/0/keys = {
 "values": [24]
 }
 
-[sub_resource type="Animation" id="Animation_ugojd"]
-resource_name = "GRAB"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [45]
-}
-
 [sub_resource type="Animation" id="Animation_u81ag"]
 resource_name = "GRABBED"
 tracks/0/type = "value"
@@ -1202,9 +1144,6 @@ tracks/0/keys = {
 "update": 0,
 "values": [28]
 }
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0atph"]
-height = 84.0
 
 [sub_resource type="Animation" id="Animation_otrgn"]
 resource_name = "PUNCHED"
@@ -1444,7 +1383,6 @@ _data = {
 "DOWN_AIR": SubResource("Animation_wlqvv"),
 "FAIR": SubResource("Animation_0bld2"),
 "FALLING": SubResource("Animation_ianko"),
-"GRAB": SubResource("Animation_ugojd"),
 "GRABBED": SubResource("Animation_u81ag"),
 "GRABBING": SubResource("Animation_jt44u"),
 "IDLE": SubResource("Animation_t2o3i"),
@@ -1490,7 +1428,7 @@ script = SubResource("GDScript_yv2bm")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 1)
-shape = SubResource("CapsuleShape2D_5hfh3")
+shape = SubResource("CapsuleShape2D_0atph")
 debug_color = Color(0, 0.6, 0.701961, 0.419608)
 script = ExtResource("1_x6t3h")
 
@@ -1568,7 +1506,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 2
 vframes = 24
-frame = 45
+frame = 43
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource("14_vt1v8")

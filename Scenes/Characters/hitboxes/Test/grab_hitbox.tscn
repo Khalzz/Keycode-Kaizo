@@ -1,14 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://drpurg4jnpt3i"]
+[gd_scene load_steps=4 format=3 uid="uid://drpurg4jnpt3i"]
 
 [ext_resource type="Script" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.gd" id="1_kkict"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q7ot2"]
+size = Vector2(24.5, 78.5)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l34tn"]
-size = Vector2(17, 19)
+size = Vector2(35, 19)
 
 [node name="GrabHitbox" type="Area2D"]
 collision_mask = 3
 script = ExtResource("1_kkict")
 
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_q7ot2")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(25, -30)
+position = Vector2(27, -17)
 shape = SubResource("RectangleShape2D_l34tn")

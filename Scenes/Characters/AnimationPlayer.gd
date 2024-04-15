@@ -80,6 +80,8 @@ func _process(delta):
 			play('PUNCHED')
 		States.LEDGE:
 			play('LEDGE')
+		States.GRAB:
+			play('GRAB')
 		States.GRABING:
 			play('GRABBING')
 		States.GRABBED:

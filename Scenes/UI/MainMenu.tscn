@@ -34,10 +34,12 @@ alignment = 1
 
 [node name="1player" type="Button" parent="UI/VBoxContainer"]
 layout_mode = 2
+focus_neighbor_bottom = NodePath("../1v1")
 text = "1 player"
 script = ExtResource("1_23idv")
 
 [node name="1v1" type="Button" parent="UI/VBoxContainer"]
 layout_mode = 2
+focus_neighbor_top = NodePath("../1player")
 text = "1V1"
 script = ExtResource("1_t3dqy")

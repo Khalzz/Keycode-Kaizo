@@ -25,9 +25,9 @@ func _process(delta):
 						else:
 							var direccion =   get_parent().global_position - element.global_position
 							if (element.is_on_floor()):
-								element.recieve_damage(10, Vector2(scale.x, -8.0), 6.2)
+								element.recieve_damage(10, Vector2(scale.x, -8.0), 6.2, false)
 							else:
-								element.recieve_damage(10, Vector2(scale.x, 8.0), 6.2)
+								element.recieve_damage(10, Vector2(scale.x, 8.0), 6.2, false)
 								
 							element.timer = 0.0
 							element.attackable = false

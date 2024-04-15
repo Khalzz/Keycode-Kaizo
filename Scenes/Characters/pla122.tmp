@@ -1,4 +1,4 @@
-[gd_scene load_steps=57 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=56 format=3 uid="uid://btnlv2vwv2vd8"]
 
 [ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
 [ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="1_x6t3h"]
@@ -57,10 +57,8 @@ var jump_direction = 0
 var grabbed_position = Vector2.ZERO
 var end_pos = Vector2.ZERO
 var grabbed_flag = false
-var grabbed_player = null # for the grabber will have value
-var grabbing_player = null # for the grabbed will have value
+var grabbed_player = null
 var canThrow = true
-var canGrab = true
 var mash_count = 0
 
 enum MashDirections {LEFT, RIGHT, UP, DOWN}
@@ -179,10 +177,11 @@ func _physics_process(delta):
 	
 func mash():
 	if state == States.GRABBED or state == States.PUNCHED:
+		print(mash_count)
 		var mashInput = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
 		if device_id == -1:
 			mashInput = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
-
+			
 		if mashInput.x > 0.5 and round(mashInput.y) == 0 and last_mash_dir != MashDirections.RIGHT:
 			mash_count += 1
 			last_mash_dir = MashDirections.RIGHT
@@ -241,7 +240,7 @@ func grabingLogic(delta):
 		grabbed_player = null
 
 func grabLogic(delta):
-	if grab_input and is_on_floor() and canGrab:
+	if grab_input and is_on_floor():
 		state = States.GRAB
 		isActive = false
 		dash_timer = 0.0
@@ -249,11 +248,10 @@ func grabLogic(delta):
 
 func resetGrab(delta):
 	if state == States.GRAB:
-		canGrab = false	
-		if dash_timer >= 0.2:
+		if dash_timer >= 0.1:
 			state == States.IDLE
 			isActive = true
-
+			
 func basicAttackTrueValue():
 	if !basic_attack_flag and !basic_attack_input:
 		basic_attack_flag = true
@@ -316,7 +314,7 @@ func recieve_damage(multiplier, vector, damage, fixed_vector):
 		$CollisionShape2D.scale.x = -1
 	else:
 		$CollisionShape2D.scale.x = 1
-
+		
 	if !fixed_vector:
 		if damage < 8:
 			punchedTime = 0.5
@@ -325,7 +323,7 @@ func recieve_damage(multiplier, vector, damage, fixed_vector):
 				punchedTime = 1 + sum_to_damage
 			else:
 				punchedTime = 4
-
+		
 		velocity.x = vector.x * life
 		velocity.y = vector.y * life
 	else:
@@ -498,9 +496,6 @@ func stateReseters():
 			can_fastfall = true
 		if !canThrow:
 			canThrow = true
-
-	if !grab_input:
-		canGrab = true
 
 	if jump_input:
 		if (state == States.FALLING and jumpCount > 0 and canJumpEsp) or is_on_floor() or state == States.LEDGE:
@@ -705,11 +700,9 @@ func shieldKnockBack(knockDirection, knockValue):
 # RESETERS -----------------------------------------------------------------------------------------
 func resetGrabbed(dash_timer):
 	if state == States.GRABBED:
-		if dash_timer >= 2 or mash_count >= 6:
+		if dash_timer >= 2 or mash_count >= 8:
 			grabbed_flag = false
-			isActive = true
-			grabbing_player.state = States.IDLE
-			grabbing_player.isActive = true
+		
 
 func resetShieldKnockBack(dash_timer):
 	if state == States.SHIELDKNOCKBACKED:
@@ -820,6 +813,7 @@ func resetAvoid(dash_timer):
 			
 func resetPunched(dash_timer):
 	if state == States.PUNCHED:
+		print(mash_count)
 		rotate_to_direction($Sprite2D, -1)
 		bouncing = true
 		if dash_timer >= 0.2:
@@ -1045,21 +1039,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [24]
-}
-
-[sub_resource type="Animation" id="Animation_ugojd"]
-resource_name = "GRAB"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [45]
 }
 
 [sub_resource type="Animation" id="Animation_u81ag"]
@@ -1444,7 +1423,6 @@ _data = {
 "DOWN_AIR": SubResource("Animation_wlqvv"),
 "FAIR": SubResource("Animation_0bld2"),
 "FALLING": SubResource("Animation_ianko"),
-"GRAB": SubResource("Animation_ugojd"),
 "GRABBED": SubResource("Animation_u81ag"),
 "GRABBING": SubResource("Animation_jt44u"),
 "IDLE": SubResource("Animation_t2o3i"),
@@ -1568,7 +1546,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 2
 vframes = 24
-frame = 45
+frame = 20
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource("14_vt1v8")
