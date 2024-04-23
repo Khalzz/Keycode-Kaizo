@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=56 format=3 uid="uid://btnlv2vwv2vd8"]
 
 [ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
 [ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="1_x6t3h"]
@@ -27,9 +27,6 @@ script/source = "extends CharacterBody2D
 @export var player_id = 0
 @export var debugging = false
 @export var camera = Camera2D
-
-@onready
-var suplex_position = $SuplexPosition
 
 @export var r = 0.0
 @export var g = 0.0
@@ -64,7 +61,6 @@ var grabbing_player = null # for the grabbed will have value
 var canThrow = true
 var canGrab = true
 var mash_count = 0
-var fixedVector = Vector2.ZERO
 
 enum MashDirections {LEFT, RIGHT, UP, DOWN}
 var last_mash_dir = null
@@ -137,7 +133,7 @@ func _ready():
 	starting_mask = collision_mask
 	hud = get_node(\"../HUD\")
 	
-func _process(_delta):
+func _process(delta):
 	if state == States.SHIELDING and dash_timer <= 0.5:
 		$Sprite2D.modulate.r = 0.9
 		$Sprite2D.modulate.g = 0.9
@@ -168,7 +164,7 @@ func _physics_process(delta):
 			shieldLogic(delta)
 			shieldRoll()
 			ledgeLogic(delta)
-			grabLogic()
+			grabLogic(delta)
 			if state != States.LEDGE:
 				fastfalling(delta)
 		else:
@@ -176,8 +172,8 @@ func _physics_process(delta):
 	else:
 		activeReset(delta)
 	bouncingLogic(delta)
-	grabingLogic()
-	grabbedLogic()
+	grabingLogic(delta)
+	grabbedLogic(delta)
 	mash()
 	
 func mash():
@@ -201,22 +197,18 @@ func mash():
 	else:
 		mash_count = 0
 
-func grabbedLogic():
+func grabbedLogic(delta):
 	# add the posibility to mash untill the enemy drops you
 	if state == States.GRABBED:
 		if grabbed_flag:
 			if last_direction > 0:
 				end_pos = Vector2(grabbed_position.x - $GrabHitbox/grabbed_pos.position.x, grabbed_position.y - $GrabHitbox/grabbed_pos.position.y)
 			else:
-				end_pos = Vector2(grabbed_position.x + $GrabHitbox/grabbed_pos.position.x, grabbed_position.y - $GrabHitbox/grabbed_pos.position.y)
+				end_pos = Vector2(grabbed_position.x + $GrabHitbox/grabbed_pos.position.x, grabbed_position.y - $GrabHitbox/grabbed_pos.position.y)				
 			grabbed_flag = false
 		position = end_pos
-	if grabbing_player != null:
-		if grabbing_player.state == States.BACK_THROW:
-			punchedTime = 0.3
-			state = States.PUNCHED
 
-func grabingLogic():
+func grabingLogic(delta):
 	if state == States.GRABING and canThrow:
 		camera.max_zoom = lerpf(camera.max_zoom, 20.0, 0.01)
 		camera.margin = lerp(Vector2(400, 200), Vector2(200, 100), 0.01)
@@ -226,9 +218,10 @@ func grabingLogic():
 			grabDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
 			
 		if grabDirection.x < -0.8 or grabDirection.x > 0.8:
-			fixedVector = Vector2(round(grabDirection.x) * 1000, -300)
+			var fixedVector = Vector2(round(grabDirection.x) * 1000, -300)
 			grabbed_player.punchedTime = 3
 			grabbed_player.grabbed_flag = false
+			grabbed_player.recieve_damage(0, fixedVector, 2, true)
 			if grabDirection.x < -0.8 and last_direction < 0 or grabDirection.x > 0.8 and last_direction > 0:
 				state = States.FORWARD_THROW
 				isActive = false
@@ -240,19 +233,20 @@ func grabingLogic():
 				dash_timer = 0.0
 				# when the suplex movement ends, throw the enemy
 		elif grabDirection.y < -0.8: # down
-			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 2000), States.DOWN_THROW)
+			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 2000))
 		elif grabDirection.y > 0.8: # up
-			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 1100), States.UP_THROW)
-	if state != States.GRABING and state != States.FORWARD_THROW and state != States.BACK_THROW:
+			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 1100))
+	if state != States.GRABING:
 		grabbed_player = null
 
-func yAxisThrow(vector, newState):
+func yAxisThrow(fixedVector):
 	grabbed_player.grabbed_flag = false
-	grabbed_player.recieve_damage(0, vector, 4, true)
+	grabbed_player.recieve_damage(0, fixedVector, 4, true)
 	grabbed_player.punchedTime = 3
-	state = newState
+	state = States.IDLE
+	isActive = true
 
-func grabLogic():
+func grabLogic(delta):
 	if grab_input and is_on_floor() and canGrab:
 		state = States.GRAB
 		isActive = false
@@ -280,9 +274,9 @@ func rotate_to_direction(element, mod):
 	else:
 		var playerVelocity = get_velocity()
 		var playerDirection = playerVelocity.normalized() if playerVelocity.normalized().x > 0 or mod != -1 else -playerVelocity.normalized()
-		var _rotation_degrees = playerDirection.angle()
+		var rotation_degrees = playerDirection.angle()
 		element.visible = true
-		element.rotation = _rotation_degrees
+		element.rotation = rotation_degrees
 
 func bouncingLogic(delta):
 	if state == States.PUNCHED and !is_on_floor() and punchedTime > 2:
@@ -299,7 +293,7 @@ func standPosition():
 	state = States.IDLE
 	bounceDivisor = 1
 
-func recieve_damage(_multiplier, vector, damage, fixed_vector):
+func recieve_damage(multiplier, vector, damage, fixed_vector):
 	if state == States.LEDGE:
 		flagLedging = false
 		porposefull_unledged = true
@@ -329,7 +323,7 @@ func recieve_damage(_multiplier, vector, damage, fixed_vector):
 		velocity.y = vector.y * life
 	else:
 		velocity = vector
-	
+
 	collision_layer = avoid_layer #
 	collision_mask = avoid_mask #
 	isActive = false #
@@ -411,25 +405,25 @@ func touchingFloor(delta):
 
 func activeReset(delta):
 	dash_timer += delta
-	resetDashAttack()
-	resetNeutralAir()
-	resetDownAir()
-	resetSideTilt()
-	resetUpAir()
-	resetUpTilt()
-	resetForwardAir()
-	resetBackAir()
-	resetDownTilt()
-	resetJab()
-	resetStanding()
-	resetRolling()
-	resetAvoid()
-	resetPunched()
-	resetShieldKnockBack()
-	resetGrab()
-	resetGrabbed()
-	resetForwardThrow()
-	resetBackThrow()
+	resetDashAttack(dash_timer)
+	resetNeutralAir(dash_timer)
+	resetDownAir(dash_timer)
+	resetSideTilt(dash_timer)
+	resetUpAir(dash_timer)
+	resetUpTilt(dash_timer)
+	resetForwardAir(dash_timer)
+	resetBackAir(dash_timer)
+	resetDownTilt(dash_timer)
+	resetJab(dash_timer)
+	resetStanding(dash_timer)
+	resetRolling(dash_timer)
+	resetAvoid(dash_timer)
+	resetPunched(dash_timer)
+	resetShieldKnockBack(dash_timer)
+	resetGrab(dash_timer)
+	resetGrabbed(dash_timer)
+	resetForwardThrow(dash_timer)
+	resetBackThrow(dash_timer)
 
 func shieldRoll():
 	if state == States.SHIELDING and (shieldDirection.x > 0.8 or shieldDirection.x < -0.8) and (shieldDirection.y < 0.8 and shieldDirection.y > -0.8) and canRoll:
@@ -581,11 +575,11 @@ func isBackAir():
 
 
 # LEDGE
-func GrabLedge(direction_val, position_hitbox, delta):
+func GrabLedge(direction_val, position_hitbox, hitboxList, delta):
 	if !porposefull_unledged:
 		ledge_timer += delta
 		var spec_direction
-	
+		
 		if jump_direction > 0:
 			spec_direction = 1
 			ledge_direction = 1
@@ -645,7 +639,7 @@ func ledgeLogic(delta):
 
 # Attacks / movements ------------------------------------------------------------------------------
 func avoid_generic(playerState, active, walking):
-	resetAvoid()
+	resetAvoid(false)
 	state = playerState
 	isActive = active
 	dash_timer = 0.0
@@ -707,28 +701,20 @@ func shieldKnockBack(knockDirection, knockValue):
 	isActive = false
 
 # RESETERS -----------------------------------------------------------------------------------------
-func setActive():
-	isActive = true
-
-
-func resetUpThrow():
-	isActive = true
-	
-func resetForwardThrow():
+func resetForwardThrow(delta):
 	if state == States.FORWARD_THROW:
 		if dash_timer >= 0.2:
 			state = States.IDLE
 			isActive = true
-
-func resetBackThrow():
+			
+func resetBackThrow(delta):
 	if state == States.BACK_THROW:
-		grabbed_player.global_position = $GrabHitbox/SuplexPosition.global_position
-		if dash_timer > 0.3:
-			grabbed_player.recieve_damage(0, fixedVector, 4, true)
+		if dash_timer > 1:
 			state = States.STANDING
 			dash_timer = 0.0
+			print(\"daniao\")
 
-func resetGrab():
+func resetGrab(delta):
 	if state == States.GRAB:
 		canGrab = false
 		if dash_timer >= 0.2:
@@ -742,7 +728,7 @@ func resetDowned(delta):
 		if downed_timer >= 3:
 			standPosition()
 
-func resetGrabbed():
+func resetGrabbed(dash_timer):
 	if state == States.GRABBED:
 		if dash_timer >= 2 or mash_count >= 6:
 			grabbed_flag = false
@@ -750,7 +736,7 @@ func resetGrabbed():
 			grabbing_player.state = States.IDLE
 			grabbing_player.isActive = true
 
-func resetShieldKnockBack():
+func resetShieldKnockBack(dash_timer):
 	if state == States.SHIELDKNOCKBACKED:
 		camera.max_zoom = lerpf(camera.max_zoom, 20.0, 0.01)
 		camera.margin = Vector2(200, 100)
@@ -768,7 +754,7 @@ func resetShieldKnockBack():
 			velocity.x = 0
 			Engine.set_time_scale(1.0)
 
-func resetDashAttack():
+func resetDashAttack(dash_timer):
 	if state == States.DASH_ATTACK:
 		if dash_timer >= 0.1:
 			state = States.IDLE
@@ -779,59 +765,59 @@ func generic_reset(playerState, walking, active):
 	collision_layer = starting_layer
 	collision_mask = starting_mask
 	state = playerState
-	isWalking = walking
-	isActive = active
+	isWalking = true
+	isActive = true
 
-func resetNeutralAir():
+func resetNeutralAir(dash_timer):
 	if state == States.NEUTRAL_AIR:
 		if dash_timer >= 0.5 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
 
-func resetDownAir():
+func resetDownAir(dash_timer):
 	if state == States.DOWN_AIR:
 		if dash_timer >= 0.4 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
 
-func resetSideTilt():
+func resetSideTilt(dash_timer):
 	if state == States.SIDETILT:
 		if dash_timer >= 0.2:
 			coolDownAttack(0.1, States.IDLE, true)
 
-func resetUpAir():
+func resetUpAir(dash_timer):
 	if state == States.UP_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
 
-func resetForwardAir():
+func resetForwardAir(dash_timer):
 	if state == States.FORWARD_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
 
-func resetBackAir():
+func resetBackAir(dash_timer):
 	if state == States.BACK_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
 
-func resetUpTilt():
+func resetUpTilt(dash_timer):
 	if state == States.UPTILT:
 		if dash_timer >= 0.2:
 			state = States.IDLE
 			isWalking = true
 			isActive = true
 
-func resetDownTilt():
+func resetDownTilt(dash_timer):
 	if state == States.DOWNTILT:
 		if dash_timer >= 0.2:
 			coolDownAttack(0.1, States.CROUCHING, false)
 
-func resetJab():
+func resetJab(dash_timer):
 	if state == States.JAB:
 		if dash_timer >= 0.2:
 			state = States.IDLE
 			isWalking = true
 			isActive = true
 		
-func resetStanding():
+func resetStanding(dash_timer):
 	if state == States.STANDING:
 		if dash_timer >= 0.7:
 			collision_layer = starting_layer
@@ -839,7 +825,7 @@ func resetStanding():
 			isActive = true
 			state = States.IDLE
 
-func resetRolling():
+func resetRolling(dash_timer):
 	if state == States.ROLLING:
 		if dash_timer >= 0.2:
 			collision_layer = starting_layer
@@ -848,7 +834,7 @@ func resetRolling():
 			state = States.IDLE
 			$Sprite2D.modulate.a = 1.0
 			
-func resetAvoid():
+func resetAvoid(dash_timer):
 	if state == States.AVOID:
 		if dash_timer >= 0.3:
 			collision_layer = starting_layer
@@ -857,7 +843,7 @@ func resetAvoid():
 			state = States.IDLE
 			$Sprite2D.modulate.a = 1.0
 			
-func resetPunched():
+func resetPunched(dash_timer):
 	if state == States.PUNCHED:
 		rotate_to_direction($Sprite2D, -1)
 		bouncing = true
@@ -889,13 +875,12 @@ func coolDownAttack(time, newState, walkable):
 	isActive = true
 "
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vfkqx"]
-resource_local_to_scene = true
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0atph"]
 height = 84.0
 
 [sub_resource type="Animation" id="Animation_0sehn"]
 resource_name = "AVOID"
-length = 0.3
+length = 0.5
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -907,46 +892,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [29]
-}
-
-[sub_resource type="Animation" id="Animation_etlqm"]
-resource_name = "BACK_THROW"
-length = 0.5
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 1,
-"values": [40, 41, 42, 43, 44]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("GrabHitbox/SuplexPosition:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0.05, 0.1, 0.15, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector2(19, -14), Vector2(-4, -24), Vector2(-35, 1), Vector2(-29, 15)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("GrabHitbox/SuplexPosition:rotation")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0.05, 0.1, 0.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.0, -1.5708, -3.14159]
 }
 
 [sub_resource type="Animation" id="Animation_jay74"]
@@ -1297,6 +1242,18 @@ tracks/0/keys = {
 "update": 0,
 "values": [31]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:shape")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("CapsuleShape2D_0atph")]
+}
 
 [sub_resource type="Animation" id="Animation_pf5cd"]
 length = 0.001
@@ -1497,38 +1454,8 @@ tracks/0/keys = {
 "values": [15]
 }
 
-[sub_resource type="Animation" id="Animation_oxv75"]
-resource_name = "UP_THROW"
-length = 0.3
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Sprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [37]
-}
-tracks/1/type = "method"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0.3),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"resetUpThrow"
-}]
-}
-
-[sub_resource type="Animation" id="Animation_khabu"]
-resource_name = "DOWN_THROW"
+[sub_resource type="Animation" id="Animation_etlqm"]
+resource_name = "BACK_THROW"
 length = 2.0
 tracks/0/type = "value"
 tracks/0/imported = false
@@ -1537,47 +1464,22 @@ tracks/0/path = NodePath("Sprite2D:frame")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 1,
-"values": [38]
+"values": [40, 41, 42, 43, 44]
 }
-tracks/1/type = "method"
+tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath(".")
+tracks/1/path = NodePath("SuplexPosition:position")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"values": []
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("GrabHitbox/SuplexPosition:position")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.2),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 0,
-"values": [Vector2(5, -58), Vector2(0, 38)]
-}
-tracks/3/type = "method"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath(".")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0.4),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [],
-"method": &"setActive"
-}]
+"values": [Vector2(19, -14), Vector2(-4, -24), Vector2(-35, 1), Vector2(-29, 15)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_2gus0"]
@@ -1590,7 +1492,6 @@ _data = {
 "DOWNED": SubResource("Animation_iwlg7"),
 "DOWNTILT": SubResource("Animation_wgh02"),
 "DOWN_AIR": SubResource("Animation_wlqvv"),
-"DOWN_THROW": SubResource("Animation_khabu"),
 "FAIR": SubResource("Animation_0bld2"),
 "FALLING": SubResource("Animation_ianko"),
 "FORWARD_THROW": SubResource("Animation_h8b8u"),
@@ -1613,7 +1514,6 @@ _data = {
 "Test avoid": SubResource("Animation_4052c"),
 "UPAIR": SubResource("Animation_m6fbm"),
 "UPTILT": SubResource("Animation_np8oa"),
-"UP_THROW": SubResource("Animation_oxv75"),
 "WALKING": SubResource("Animation_yhr26")
 }
 
@@ -1640,7 +1540,7 @@ script = SubResource("GDScript_yv2bm")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 1)
-shape = SubResource("CapsuleShape2D_vfkqx")
+shape = SubResource("CapsuleShape2D_0atph")
 debug_color = Color(0, 0.6, 0.701961, 0.419608)
 script = ExtResource("1_x6t3h")
 
@@ -1655,10 +1555,6 @@ script = ExtResource("1_sd273")
 
 [node name="GrabHitbox" parent="." instance=ExtResource("2_w5v7k")]
 
-[node name="SuplexPosition" type="Node2D" parent="GrabHitbox"]
-position = Vector2(0, 38)
-rotation = -3.14159
-
 [node name="grabbing_pos" type="Node2D" parent="GrabHitbox"]
 position = Vector2(17.78, -36.49)
 
@@ -1670,7 +1566,6 @@ visible = false
 position = Vector2(0, -8)
 collision_layer = 1
 collision_mask = 3
-monitoring = false
 
 [node name="DASH_ATTACK_HITBOX" parent="." instance=ExtResource("14_h4xt5")]
 visible = false
@@ -1722,7 +1617,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 10
 vframes = 5
-frame = 38
+frame = 44
 
 [node name="PlayerLabel" type="Sprite2D" parent="."]
 position = Vector2(0, -62)
@@ -1758,3 +1653,12 @@ scale_amount_min = 0.2
 scale_amount_max = 2.0
 scale_amount_curve = SubResource("Curve_ghi00")
 color_ramp = SubResource("Gradient_jr7mb")
+
+[node name="SuplexPosition" type="Node2D" parent="."]
+position = Vector2(-29, 15)
+
+[node name="ColorRect" type="ColorRect" parent="SuplexPosition"]
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 5.0

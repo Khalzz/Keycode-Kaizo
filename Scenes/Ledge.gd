@@ -13,4 +13,4 @@ func _ready():
 func _process(delta):
 	for element in get_overlapping_bodies():
 		if element.has_method("GrabLedge") and element == get_overlapping_bodies()[0]:
-			element.GrabLedge(direction_val, global_position, get_overlapping_bodies(), delta)
+			element.GrabLedge(direction_val, global_position, delta)

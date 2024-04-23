@@ -86,3 +86,11 @@ func _process(delta):
 			play('GRABBING')
 		States.GRABBED:
 			play('GRABBED')
+		States.FORWARD_THROW:
+			play('FORWARD_THROW')
+		States.BACK_THROW:
+			play('BACK_THROW')
+		States.UP_THROW:
+			play('UP_THROW')
+		States.DOWN_THROW:
+			play('DOWN_THROW')
