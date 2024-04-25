@@ -97,7 +97,6 @@ var shield_input
 var basic_attack_input
 var grab_input
 var basic_attack_flag = true
-var combo_breaker_input
 
 # Recieving Damage
 var life = 0
@@ -154,7 +153,6 @@ func _process(_delta):
 	hud.setLive(life, player_id)
 
 func _physics_process(delta):
-	bouncingLogic(delta)
 	inputMovement() # here i get the values of direction
 	inputControllers()
 	touchingFloor(delta) # this function i will use it if the user is touching the floor or not
@@ -173,21 +171,15 @@ func _physics_process(delta):
 			grabLogic()
 			if state != States.LEDGE:
 				fastfalling(delta)
-		
 		else:
 			downedLogic()
 	else:
-		if state == States.PUNCHED:
-			combo_breaker()
 		activeReset(delta)
+	bouncingLogic(delta)
 	grabingLogic()
 	grabbedLogic()
 	mash()
-
-func combo_breaker():
-	if combo_breaker_input:
-		print(\"combo_breaker\")
-
+	
 func mash():
 	if state == States.GRABBED or state == States.PUNCHED:
 		var mashInput = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
@@ -232,9 +224,10 @@ func grabingLogic():
 		
 		if device_id == -1:
 			grabDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
+			
 		if grabDirection.x < -0.8 or grabDirection.x > 0.8:
 			fixedVector = Vector2(round(grabDirection.x) * 1000, -300)
-			grabbed_player.punchedTime = 0.5
+			grabbed_player.punchedTime = 3
 			grabbed_player.grabbed_flag = false
 			if grabDirection.x < -0.8 and last_direction < 0 or grabDirection.x > 0.8 and last_direction > 0:
 				state = States.FORWARD_THROW
@@ -247,7 +240,7 @@ func grabingLogic():
 				dash_timer = 0.0
 		elif grabDirection.y < -0.8: # down
 			# Fix the fact that sometimes the enemy stays in the floor and other times bounces
-			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 2000), States.DOWN_THROW)
+			yAxisThrow(Vector2(50 * -last_direction, 2000), States.DOWN_THROW)
 		elif grabDirection.y > 0.8: # up
 			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 1100), States.UP_THROW)
 	if state != States.GRABING and state != States.FORWARD_THROW and state != States.BACK_THROW:
@@ -293,12 +286,13 @@ func rotate_to_direction(element, mod):
 
 func bouncingLogic(delta):
 	if state == States.PUNCHED and !is_on_floor() and punchedTime > 2:
+		print(velocity)
 		var collision_info = move_and_collide(velocity * delta)
 		if collision_info:
 			bounceDivisor += 1
 			
-			velocity.x = velocity.x * 0.5
-			velocity.y = velocity.y * 0.5
+			velocity.x = velocity.x / bounceDivisor
+			velocity.y = velocity.y / bounceDivisor
 			velocity = velocity.bounce(collision_info.get_normal())
 	else:
 		move_and_slide()
@@ -337,7 +331,7 @@ func recieve_damage(_multiplier, vector, damage, fixed_vector):
 		velocity.x = vector.x * life
 		velocity.y = vector.y * life
 	else:
-		velocity = vector
+		velocity = Vector2(50 )vector
 	
 	collision_layer = avoid_layer #
 	collision_mask = avoid_mask #
@@ -358,8 +352,6 @@ func inputControllers():
 		shield_input = (Input.get_joy_axis(device_id, JOY_AXIS_TRIGGER_LEFT) > 0.8 or Input.get_joy_axis(device_id, JOY_AXIS_TRIGGER_RIGHT) > 0.8)
 		basic_attack_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_A) or (!is_on_floor() and Input.is_joy_button_pressed(device_id, JOY_BUTTON_RIGHT_SHOULDER))
 		grab_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_RIGHT_SHOULDER)
-		
-	combo_breaker_input = shield_input and !is_on_floor()
 	
 func downedLogic():
 	velocity.x = 0
@@ -1678,6 +1670,15 @@ metadata/_snap_count = 2
 collision_layer = 2
 floor_snap_length = 0.0
 script = SubResource("GDScript_yv2bm")
+device_id = null
+its_analog = null
+player_id = null
+debugging = null
+r = null
+g = null
+b = null
+avoid_layer = null
+avoid_mask = null
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 1)

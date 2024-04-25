@@ -97,7 +97,6 @@ var shield_input
 var basic_attack_input
 var grab_input
 var basic_attack_flag = true
-var combo_breaker_input
 
 # Recieving Damage
 var life = 0
@@ -154,7 +153,6 @@ func _process(_delta):
 	hud.setLive(life, player_id)
 
 func _physics_process(delta):
-	bouncingLogic(delta)
 	inputMovement() # here i get the values of direction
 	inputControllers()
 	touchingFloor(delta) # this function i will use it if the user is touching the floor or not
@@ -173,21 +171,15 @@ func _physics_process(delta):
 			grabLogic()
 			if state != States.LEDGE:
 				fastfalling(delta)
-		
 		else:
 			downedLogic()
 	else:
-		if state == States.PUNCHED:
-			combo_breaker()
 		activeReset(delta)
+	bouncingLogic(delta)
 	grabingLogic()
 	grabbedLogic()
 	mash()
-
-func combo_breaker():
-	if combo_breaker_input:
-		print(\"combo_breaker\")
-
+	
 func mash():
 	if state == States.GRABBED or state == States.PUNCHED:
 		var mashInput = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
@@ -232,9 +224,10 @@ func grabingLogic():
 		
 		if device_id == -1:
 			grabDirection = Input.get_vector(\"left\", \"right\", \"down\", \"up\")
+			
 		if grabDirection.x < -0.8 or grabDirection.x > 0.8:
 			fixedVector = Vector2(round(grabDirection.x) * 1000, -300)
-			grabbed_player.punchedTime = 0.5
+			grabbed_player.punchedTime = 3
 			grabbed_player.grabbed_flag = false
 			if grabDirection.x < -0.8 and last_direction < 0 or grabDirection.x > 0.8 and last_direction > 0:
 				state = States.FORWARD_THROW
@@ -296,16 +289,14 @@ func bouncingLogic(delta):
 		var collision_info = move_and_collide(velocity * delta)
 		if collision_info:
 			bounceDivisor += 1
-			
-			velocity.x = velocity.x * 0.5
-			velocity.y = velocity.y * 0.5
+			velocity.x = velocity.x / bounceDivisor
+			velocity.y = velocity.y / bounceDivisor
 			velocity = velocity.bounce(collision_info.get_normal())
 	else:
 		move_and_slide()
 
 func standPosition():
 	state = States.IDLE
-	attackable = true
 	bounceDivisor = 1
 
 func recieve_damage(_multiplier, vector, damage, fixed_vector):
@@ -358,8 +349,6 @@ func inputControllers():
 		shield_input = (Input.get_joy_axis(device_id, JOY_AXIS_TRIGGER_LEFT) > 0.8 or Input.get_joy_axis(device_id, JOY_AXIS_TRIGGER_RIGHT) > 0.8)
 		basic_attack_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_A) or (!is_on_floor() and Input.is_joy_button_pressed(device_id, JOY_BUTTON_RIGHT_SHOULDER))
 		grab_input = Input.is_joy_button_pressed(device_id, JOY_BUTTON_RIGHT_SHOULDER)
-		
-	combo_breaker_input = shield_input and !is_on_floor()
 	
 func downedLogic():
 	velocity.x = 0
@@ -731,6 +720,7 @@ func resetGrab():
 			state = States.IDLE
 			isActive = true
 
+
 func resetDowned(delta):
 	if state == States.DOWNED:
 		downed_timer += delta
@@ -770,8 +760,8 @@ func resetDashAttack():
 			isWalking = true
 			isActive = true
 
-# Test ways to refactor this code 
 func generic_reset(playerState, walking, active):
+	collision_layer = starting_layer
 	collision_mask = starting_mask
 	state = playerState
 	isWalking = walking
@@ -787,6 +777,11 @@ func resetDownAir():
 		if dash_timer >= 0.4 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
 
+func resetSideTilt():
+	if state == States.SIDETILT:
+		if dash_timer >= 0.2:
+			coolDownAttack(0.1, States.IDLE, true)
+
 func resetUpAir():
 	if state == States.UP_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
@@ -801,18 +796,12 @@ func resetBackAir():
 	if state == States.BACK_AIR:
 		if dash_timer >= 0.3 or is_on_floor():
 			generic_reset(States.FALLING, true, true)
-# Test ways to refactor this code 
-
-
-func resetSideTilt():
-	if state == States.SIDETILT:
-		if dash_timer >= 0.2:
-			coolDownAttack(0.1, States.IDLE, true)
 
 func resetDownTilt():
 	if state == States.DOWNTILT:
 		if dash_timer >= 0.2:
 			coolDownAttack(0.1, States.CROUCHING, false)
+
 
 func resetUpTilt():
 	if state == States.UPTILT:
@@ -827,6 +816,7 @@ func resetJab():
 			state = States.IDLE
 			isWalking = true
 			isActive = true
+		
 
 func resetGenericAvoid(changingColor):
 	collision_layer = starting_layer
@@ -854,8 +844,6 @@ func resetPunched():
 				isActive = true
 				state = States.DOWNED
 				$Sprite2D.rotation = 0
-				$Sprite2D.modulate.a = 0.5
-				attackable = false
 			if (dash_timer >= punchedTime and dash_timer < 0.3) or is_on_floor() or mash_count >= 5:
 				standPosition()
 				isActive = true
@@ -1100,12 +1088,9 @@ tracks/1/path = NodePath(".")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0.4),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [true],
-"method": &"setActive"
-}]
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"values": []
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -1118,6 +1103,20 @@ tracks/2/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [Vector2(5, -58), Vector2(0, 38)]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.4),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"setActive"
+}]
 }
 
 [sub_resource type="Animation" id="Animation_0bld2"]
@@ -1320,7 +1319,7 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_yme35"]
 resource_name = "NEUTRAL_AIR"
-length = 0.5
+length = 0.1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -1332,20 +1331,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [20]
-}
-tracks/1/type = "method"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath(".")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0.5),
-"transitions": PackedFloat32Array(1),
-"values": [{
-"args": [null, null, null],
-"method": &"generic_reset"
-}]
 }
 
 [sub_resource type="Animation" id="Animation_otrgn"]
@@ -1498,7 +1483,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0.7),
 "transitions": PackedFloat32Array(1),
 "values": [{
-"args": [true],
+"args": [false],
 "method": &"resetGenericAvoid"
 }]
 }
@@ -1697,7 +1682,7 @@ script = ExtResource("1_sd273")
 [node name="GrabHitbox" parent="." instance=ExtResource("2_w5v7k")]
 
 [node name="SuplexPosition" type="Node2D" parent="GrabHitbox"]
-position = Vector2(0, 38)
+position = Vector2(-29, 15)
 rotation = -3.14159
 
 [node name="grabbing_pos" type="Node2D" parent="GrabHitbox"]
@@ -1763,7 +1748,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("34_c6k68")
 hframes = 10
 vframes = 5
-frame = 31
+frame = 26
 
 [node name="PlayerLabel" type="Sprite2D" parent="."]
 position = Vector2(0, -62)

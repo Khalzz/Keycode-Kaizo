@@ -40,9 +40,6 @@ text = "100%"
 [node name="Player1" type="VBoxContainer" parent="UI/HBoxContainer"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/HBoxContainer/Player1"]
-layout_mode = 2
-
 [node name="PlayerLabel" type="Label" parent="UI/HBoxContainer/Player1"]
 layout_mode = 2
 text = "100%"

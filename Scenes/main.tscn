@@ -1,10 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://cp4px435kdc3p"]
+[gd_scene load_steps=11 format=3 uid="uid://cp4px435kdc3p"]
 
 [ext_resource type="Script" path="res://Scenes/main.gd" id="1_8la2p"]
 [ext_resource type="PackedScene" uid="uid://btnlv2vwv2vd8" path="res://Scenes/Characters/player.tscn" id="1_eip41"]
 [ext_resource type="PackedScene" uid="uid://d2r7fs0237ltw" path="res://Scenes/World/floor.tscn" id="2_awqle"]
 [ext_resource type="Script" path="res://Scenes/Ledge.gd" id="2_vioio"]
-[ext_resource type="PackedScene" uid="uid://b5kfrxlkhwr01" path="res://Scenes/Characters/punchbag.tscn" id="3_o6s3b"]
 [ext_resource type="Script" path="res://Scenes/Dead.gd" id="4_ft6to"]
 [ext_resource type="PackedScene" uid="uid://c01b7svihusgt" path="res://Scenes/UI/fight_ui.tscn" id="5_y0ins"]
 [ext_resource type="Script" path="res://Scenes/Camera.gd" id="6_84fw5"]
@@ -51,9 +50,6 @@ debug_color = Color(0.827451, 0, 0.94902, 0.419608)
 [node name="FloorDebug" parent="." instance=ExtResource("2_awqle")]
 position = Vector2(0, -1401)
 scale = Vector2(7.245, 1)
-
-[node name="PunchingBag" parent="." instance=ExtResource("3_o6s3b")]
-position = Vector2(0, -1506)
 
 [node name="Player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
 position = Vector2(-411, 309)
