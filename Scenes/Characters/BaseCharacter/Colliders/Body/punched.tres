@@ -1,0 +1,6 @@
+[gd_resource type="CapsuleShape2D" format=3 uid="uid://df8yau3qq778v"]
+
+[resource]
+resource_local_to_scene = true
+radius = 8.0
+height = 16.0

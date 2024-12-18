@@ -1,26 +1,27 @@
-[gd_scene load_steps=61 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=62 format=3 uid="uid://b6xgv6n0fyf0"]
 
-[ext_resource type="Script" path="res://Scenes/Characters/BaseCharacter/Scripts/state_machine.gd" id="1_dcas7"]
-[ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
-[ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="1_x6t3h"]
-[ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/idle.gd" id="2_o74nc"]
-[ext_resource type="PackedScene" uid="uid://drpurg4jnpt3i" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.tscn" id="2_w5v7k"]
-[ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/tilt_attack.gd" id="4_8ow1b"]
-[ext_resource type="PackedScene" uid="uid://b6b0y5nbglke3" path="res://Scenes/Characters/hitboxes/Test/jab_hitbox.tscn" id="13_gc2vs"]
-[ext_resource type="PackedScene" uid="uid://cqvv4kuglti0i" path="res://Scenes/Characters/hitboxes/Test/dash_attack_hitbox.tscn" id="14_h4xt5"]
-[ext_resource type="Script" path="res://Scenes/Characters/PlayerTag.gd" id="15_0eqv6"]
-[ext_resource type="PackedScene" uid="uid://brbtkvbimiilt" path="res://Scenes/Characters/hitboxes/Test/nair_hitbox.tscn" id="15_ia7bt"]
-[ext_resource type="Texture2D" uid="uid://flaid0sovk76" path="res://Assets/Sprites/Others/InGame/Player1.svg" id="15_xg3ct"]
-[ext_resource type="Texture2D" uid="uid://dgdanfm0upifp" path="res://Assets/Sprites/Others/InGame/Facing.svg" id="17_jyh43"]
-[ext_resource type="PackedScene" uid="uid://ujncgrjaa1a1" path="res://Scenes/Characters/hitboxes/Test/down_tilt_hitbox.tscn" id="19_enisu"]
-[ext_resource type="PackedScene" uid="uid://djt7i54iyr3g6" path="res://Scenes/Characters/hitboxes/Test/uptilt_hitbox.tscn" id="22_vcq5u"]
-[ext_resource type="PackedScene" uid="uid://bx768iceq72re" path="res://Scenes/Characters/hitboxes/Test/downair_hitbhox.tscn" id="25_p0biw"]
-[ext_resource type="PackedScene" uid="uid://boglq21xh1aex" path="res://Scenes/Characters/hitboxes/Test/sidetilt_hitbox.tscn" id="27_ffsd5"]
-[ext_resource type="PackedScene" uid="uid://w2ediwfail4o" path="res://Scenes/Characters/hitboxes/Test/upair_hitbox.tscn" id="30_v0kk2"]
-[ext_resource type="PackedScene" uid="uid://crur1am2e0fkd" path="res://Scenes/Characters/hitboxes/Test/back_air_hitbox.tscn" id="33_ylel6"]
-[ext_resource type="Texture2D" uid="uid://lu3e3dednw74" path="res://Assets/Sprites/Player/SpriteSheet/AnimationSpriteSheet.png" id="34_c6k68"]
-[ext_resource type="PackedScene" uid="uid://u8yai1ebbfid" path="res://Scenes/Characters/hitboxes/Test/forward_air_hitbox.tscn" id="34_kvrdy"]
-[ext_resource type="Script" path="res://Scenes/Characters/AnimationPlayer.gd" id="35_na8g4"]
+[ext_resource type="Script" path="res://Scenes/Characters/BaseCharacter/Scripts/state_machine.gd" id="1_b83oc"]
+[ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/idle.gd" id="2_4hrbk"]
+[ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/jab.gd" id="3_2d3rx"]
+[ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/tilt_attack.gd" id="4_7o6ja"]
+[ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="5_6873b"]
+[ext_resource type="Script" path="res://Scripts/Label.gd" id="6_ekcbv"]
+[ext_resource type="PackedScene" uid="uid://drpurg4jnpt3i" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.tscn" id="7_oeafh"]
+[ext_resource type="PackedScene" uid="uid://b6b0y5nbglke3" path="res://Scenes/Characters/hitboxes/Test/jab_hitbox.tscn" id="8_316vx"]
+[ext_resource type="PackedScene" uid="uid://cqvv4kuglti0i" path="res://Scenes/Characters/hitboxes/Test/dash_attack_hitbox.tscn" id="9_lm8w5"]
+[ext_resource type="PackedScene" uid="uid://brbtkvbimiilt" path="res://Scenes/Characters/hitboxes/Test/nair_hitbox.tscn" id="10_xbjha"]
+[ext_resource type="PackedScene" uid="uid://ujncgrjaa1a1" path="res://Scenes/Characters/hitboxes/Test/down_tilt_hitbox.tscn" id="11_pbrx2"]
+[ext_resource type="PackedScene" uid="uid://djt7i54iyr3g6" path="res://Scenes/Characters/hitboxes/Test/uptilt_hitbox.tscn" id="12_pnsmj"]
+[ext_resource type="PackedScene" uid="uid://bx768iceq72re" path="res://Scenes/Characters/hitboxes/Test/downair_hitbhox.tscn" id="13_l2pqc"]
+[ext_resource type="PackedScene" uid="uid://boglq21xh1aex" path="res://Scenes/Characters/hitboxes/Test/sidetilt_hitbox.tscn" id="14_30uy5"]
+[ext_resource type="PackedScene" uid="uid://w2ediwfail4o" path="res://Scenes/Characters/hitboxes/Test/upair_hitbox.tscn" id="15_dxswv"]
+[ext_resource type="PackedScene" uid="uid://crur1am2e0fkd" path="res://Scenes/Characters/hitboxes/Test/back_air_hitbox.tscn" id="16_besya"]
+[ext_resource type="PackedScene" uid="uid://u8yai1ebbfid" path="res://Scenes/Characters/hitboxes/Test/forward_air_hitbox.tscn" id="17_q04nx"]
+[ext_resource type="Script" path="res://Scenes/Characters/AnimationPlayer.gd" id="18_ksk5v"]
+[ext_resource type="Texture2D" uid="uid://lu3e3dednw74" path="res://Assets/Sprites/Player/SpriteSheet/AnimationSpriteSheet.png" id="19_xbwwh"]
+[ext_resource type="Texture2D" uid="uid://flaid0sovk76" path="res://Assets/Sprites/Others/InGame/Player1.svg" id="20_iir2u"]
+[ext_resource type="Script" path="res://Scenes/Characters/PlayerTag.gd" id="21_xbh8s"]
+[ext_resource type="Texture2D" uid="uid://dgdanfm0upifp" path="res://Assets/Sprites/Others/InGame/Facing.svg" id="22_wcqb2"]
 
 [sub_resource type="GDScript" id="GDScript_yv2bm"]
 script/source = "extends CharacterBody2D
@@ -31,8 +32,8 @@ script/source = "extends CharacterBody2D
 @export var debugging = false
 @export var camera = Camera2D
 
-
-@onready var suplex_position = $SuplexPosition
+@onready
+var suplex_position = $SuplexPosition
 
 @export var r = 0.0
 @export var g = 0.0
@@ -43,41 +44,9 @@ script/source = "extends CharacterBody2D
 
 # Other data
 var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\") * 3
-enum States {
-	IDLE, 
-	WALKING, 
-	RUNNING, 
-	JUMPING, 
-	FALLING, 
-	JAB, 
-	DASH_ATTACK, 
-	NEUTRAL_AIR, 
-	CROUCHING, 
-	DOWNTILT, 
-	UPTILT, 
-	SIDETILT, 
-	DOWN_AIR, 
-	UP_AIR, 
-	FORWARD_AIR, 
-	BACK_AIR, 
-	SHIELDING, 
-	SHIELDKNOCKBACKED, 
-	DOWNED, 
-	STANDING, 
-	ROLLING, 
-	DODGE, 
-	PUNCHED, 
-	LEDGE, 
-	GRAB, 
-	GRABBING, 
-	GRABBED, 
-	FORWARD_THROW, 
-	BACK_THROW, 
-	UP_THROW, 
-	DOWN_THROW
-}
+enum States {IDLE, WALKING, RUNNING, JUMPING, FALLING, JAB, DASH_ATTACK, NEUTRAL_AIR, CROUCHING, DOWNTILT, UPTILT, SIDETILT, DOWN_AIR, UP_AIR, FORWARD_AIR, BACK_AIR, SHIELDING, SHIELDKNOCKBACKED, DOWNED, STANDING, ROLLING, AVOID, PUNCHED, LEDGE, GRAB, GRABING, GRABBED, FORWARD_THROW, BACK_THROW, UP_THROW, DOWN_THROW}
 
-@export var state = States.IDLE
+var state = States.IDLE
 
 # Movement
 var direction
@@ -182,7 +151,7 @@ func _process(_delta):
 		$Sprite2D.modulate.r = r
 		$Sprite2D.modulate.g = g
 		$Sprite2D.modulate.b = b
-	if camera.max_zoom > 1 and state != States.SHIELDKNOCKBACKED and state != States.GRABBING and state != States.GRABBED: 
+	if camera.max_zoom > 1 and state != States.SHIELDKNOCKBACKED and state != States.GRABING and state != States.GRABBED: 
 		camera.max_zoom = lerpf(camera.max_zoom, 1.0, 0.001)
 		camera.margin = lerp(camera.margin, Vector2(400, 200), 0.001)
 	rotate_to_direction($Facing, 1)
@@ -260,7 +229,7 @@ func grabbedLogic():
 			state = States.PUNCHED
 
 func grabingLogic():
-	if state == States.GRABBING and canThrow:
+	if state == States.GRABING and canThrow:
 		camera.max_zoom = lerpf(camera.max_zoom, 20.0, 0.01)
 		camera.margin = lerp(Vector2(400, 200), Vector2(200, 100), 0.01)
 		var grabDirection = Vector2(Input.get_joy_axis(device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(device_id, JOY_AXIS_LEFT_Y))
@@ -285,7 +254,7 @@ func grabingLogic():
 			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 2000), States.DOWN_THROW)
 		elif grabDirection.y > 0.8: # up
 			yAxisThrow(Vector2(50 * -last_direction, -round(grabDirection.y) * 1100), States.UP_THROW)
-	if state != States.GRABBING and state != States.FORWARD_THROW and state != States.BACK_THROW:
+	if state != States.GRABING and state != States.FORWARD_THROW and state != States.BACK_THROW:
 		grabbed_player = null
 
 func yAxisThrow(vector, newState):
@@ -711,7 +680,7 @@ func baseTiltAttack(playerState, go_forward):
 
 # SHIELDING AND ROLLING
 func avoid():
-	avoid_generic(States.DODGE, false, true)
+	avoid_generic(States.AVOID, false, true)
 	$Sprite2D.modulate.a = 0.5
 
 func roll():
@@ -897,8 +866,7 @@ func coolDownAttack(time, newState, walkable):
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vfkqx"]
 resource_local_to_scene = true
-radius = 11.0
-height = 82.0
+height = 84.0
 
 [sub_resource type="Animation" id="Animation_0sehn"]
 resource_name = "AVOID"
@@ -1337,7 +1305,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath(".:state")
+tracks/4/path = NodePath("StateMachine:state")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -1454,7 +1422,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath(".:state")
+tracks/2/path = NodePath("StateMachine:state")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -1777,10 +1745,10 @@ floor_snap_length = 0.0
 script = SubResource("GDScript_yv2bm")
 
 [node name="StateMachine" type="Node" parent="."]
-script = ExtResource("1_dcas7")
+script = ExtResource("1_b83oc")
 
 [node name="IDLE" type="Node2D" parent="StateMachine"]
-script = ExtResource("2_o74nc")
+script = ExtResource("2_4hrbk")
 
 [node name="WALKING" type="Node2D" parent="StateMachine"]
 
@@ -1790,12 +1758,15 @@ script = ExtResource("2_o74nc")
 
 [node name="FALLING" type="Node2D" parent="StateMachine"]
 
+[node name="JAB" type="Node2D" parent="StateMachine"]
+script = ExtResource("3_2d3rx")
+
 [node name="DASH_ATTACK" type="Node2D" parent="StateMachine"]
 
 [node name="CROUCHING" type="Node2D" parent="StateMachine"]
 
 [node name="TILT_ATTACK" type="Node2D" parent="StateMachine"]
-script = ExtResource("4_8ow1b")
+script = ExtResource("4_7o6ja")
 
 [node name="NEUTRAL_AIR" type="Node2D" parent="StateMachine"]
 
@@ -1841,7 +1812,7 @@ script = ExtResource("4_8ow1b")
 position = Vector2(0, 1)
 shape = SubResource("CapsuleShape2D_vfkqx")
 debug_color = Color(0, 0.6, 0.701961, 0.419608)
-script = ExtResource("1_x6t3h")
+script = ExtResource("5_6873b")
 
 [node name="Label" type="Label" parent="."]
 offset_left = -47.0
@@ -1850,11 +1821,11 @@ offset_right = 47.0
 offset_bottom = -82.0
 text = "Jumping"
 horizontal_alignment = 1
-script = ExtResource("1_sd273")
+script = ExtResource("6_ekcbv")
 
 [node name="HITBOXES" type="Node2D" parent="."]
 
-[node name="GrabHitbox" parent="HITBOXES" instance=ExtResource("2_w5v7k")]
+[node name="GrabHitbox" parent="HITBOXES" instance=ExtResource("7_oeafh")]
 visible = false
 monitoring = false
 
@@ -1868,53 +1839,53 @@ position = Vector2(17.78, -36.49)
 [node name="grabbed_pos" type="Node2D" parent="HITBOXES/GrabHitbox"]
 position = Vector2(10, -34)
 
-[node name="JAB_HITBOX" parent="HITBOXES" instance=ExtResource("13_gc2vs")]
+[node name="JAB_HITBOX" parent="HITBOXES" instance=ExtResource("8_316vx")]
 visible = false
 position = Vector2(0, -8)
 collision_layer = 1
 collision_mask = 3
 monitoring = false
 
-[node name="DASH_ATTACK_HITBOX" parent="HITBOXES" instance=ExtResource("14_h4xt5")]
+[node name="DASH_ATTACK_HITBOX" parent="HITBOXES" instance=ExtResource("9_lm8w5")]
 visible = false
 collision_mask = 3
 monitoring = false
 
-[node name="NAIR_HITBOX" parent="HITBOXES" instance=ExtResource("15_ia7bt")]
+[node name="NAIR_HITBOX" parent="HITBOXES" instance=ExtResource("10_xbjha")]
 visible = false
 monitoring = false
 
-[node name="DOWN_TILT_HITBOX" parent="HITBOXES" instance=ExtResource("19_enisu")]
+[node name="DOWN_TILT_HITBOX" parent="HITBOXES" instance=ExtResource("11_pbrx2")]
 visible = false
 monitoring = false
 
-[node name="UPTILT_HITBOX" parent="HITBOXES" instance=ExtResource("22_vcq5u")]
+[node name="UPTILT_HITBOX" parent="HITBOXES" instance=ExtResource("12_pnsmj")]
 visible = false
 scale = Vector2(1.595, 1.2)
 collision_mask = 3
 monitoring = false
 
-[node name="DOWNAIR_HITBHOX" parent="HITBOXES" instance=ExtResource("25_p0biw")]
+[node name="DOWNAIR_HITBHOX" parent="HITBOXES" instance=ExtResource("13_l2pqc")]
 visible = false
 collision_mask = 3
 monitoring = false
 
-[node name="SIDETILT_HITBOX" parent="HITBOXES" instance=ExtResource("27_ffsd5")]
+[node name="SIDETILT_HITBOX" parent="HITBOXES" instance=ExtResource("14_30uy5")]
 visible = false
 collision_mask = 3
 monitoring = false
 
-[node name="UPAIR_HITBOX" parent="HITBOXES" instance=ExtResource("30_v0kk2")]
+[node name="UPAIR_HITBOX" parent="HITBOXES" instance=ExtResource("15_dxswv")]
 visible = false
 collision_mask = 3
 monitoring = false
 
-[node name="BACK_AIR_HITBOX" parent="HITBOXES" instance=ExtResource("33_ylel6")]
+[node name="BACK_AIR_HITBOX" parent="HITBOXES" instance=ExtResource("16_besya")]
 visible = false
 collision_mask = 3
 monitoring = false
 
-[node name="FORWARD_AIR_HITBOX" parent="HITBOXES" instance=ExtResource("34_kvrdy")]
+[node name="FORWARD_AIR_HITBOX" parent="HITBOXES" instance=ExtResource("17_q04nx")]
 visible = false
 collision_mask = 3
 monitoring = false
@@ -1923,12 +1894,12 @@ monitoring = false
 libraries = {
 "": SubResource("AnimationLibrary_2gus0")
 }
-script = ExtResource("35_na8g4")
+script = ExtResource("18_ksk5v")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(0, 3)
 scale = Vector2(0.235, 0.235)
-texture = ExtResource("34_c6k68")
+texture = ExtResource("19_xbwwh")
 hframes = 10
 vframes = 5
 frame = 6
@@ -1936,8 +1907,8 @@ frame = 6
 [node name="PlayerLabel" type="Sprite2D" parent="."]
 position = Vector2(0, -62)
 scale = Vector2(0.2, 0.2)
-texture = ExtResource("15_xg3ct")
-script = ExtResource("15_0eqv6")
+texture = ExtResource("20_iir2u")
+script = ExtResource("21_xbh8s")
 
 [node name="FastFalling" type="Sprite2D" parent="."]
 position = Vector2(14, -34)
@@ -1945,7 +1916,7 @@ scale = Vector2(0.16, 0.16)
 
 [node name="Facing" type="Sprite2D" parent="."]
 scale = Vector2(0.185, 0.185)
-texture = ExtResource("17_jyh43")
+texture = ExtResource("22_wcqb2")
 offset = Vector2(392.77, 0)
 
 [node name="CPUParticles2D3" type="CPUParticles2D" parent="."]

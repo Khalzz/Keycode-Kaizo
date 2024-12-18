@@ -1,8 +1,9 @@
-[gd_scene load_steps=61 format=3 uid="uid://btnlv2vwv2vd8"]
+[gd_scene load_steps=62 format=3 uid="uid://btnlv2vwv2vd8"]
 
-[ext_resource type="Script" path="res://Scenes/Characters/BaseCharacter/Scripts/state_machine.gd" id="1_dcas7"]
+[ext_resource type="Script" path="res://Scripts/Player/state_machine.gd" id="1_dcas7"]
 [ext_resource type="Script" path="res://Scripts/Label.gd" id="1_sd273"]
 [ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="1_x6t3h"]
+[ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/jab.gd" id="2_eyrlg"]
 [ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/idle.gd" id="2_o74nc"]
 [ext_resource type="PackedScene" uid="uid://drpurg4jnpt3i" path="res://Scenes/Characters/hitboxes/Test/grab_hitbox.tscn" id="2_w5v7k"]
 [ext_resource type="Script" path="res://Scripts/Player/Characters/Base/States/tilt_attack.gd" id="4_8ow1b"]
@@ -897,8 +898,7 @@ func coolDownAttack(time, newState, walkable):
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vfkqx"]
 resource_local_to_scene = true
-radius = 11.0
-height = 82.0
+height = 84.0
 
 [sub_resource type="Animation" id="Animation_0sehn"]
 resource_name = "AVOID"
@@ -1337,7 +1337,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath(".:state")
+tracks/4/path = NodePath("StateMachine:state")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -1454,7 +1454,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath(".:state")
+tracks/2/path = NodePath("StateMachine:state")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -1776,8 +1776,9 @@ collision_layer = 2
 floor_snap_length = 0.0
 script = SubResource("GDScript_yv2bm")
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
 script = ExtResource("1_dcas7")
+animation_player = NodePath("../AnimationPlayer")
 
 [node name="IDLE" type="Node2D" parent="StateMachine"]
 script = ExtResource("2_o74nc")
@@ -1789,6 +1790,9 @@ script = ExtResource("2_o74nc")
 [node name="JUMPING" type="Node2D" parent="StateMachine"]
 
 [node name="FALLING" type="Node2D" parent="StateMachine"]
+
+[node name="JAB" type="Node2D" parent="StateMachine"]
+script = ExtResource("2_eyrlg")
 
 [node name="DASH_ATTACK" type="Node2D" parent="StateMachine"]
 

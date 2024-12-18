@@ -4,9 +4,9 @@ func _ready():
 	pass
 	
 func _process(delta):
-	var States = get_parent().States
-	var state = get_parent().state
-	var direction = get_parent().last_direction
+	var States = get_parent().get_parent().States
+	var state = get_parent().get_parent().state
+	var direction = get_parent().get_parent().last_direction
 	
 	if direction > 0:
 		scale.x = 1

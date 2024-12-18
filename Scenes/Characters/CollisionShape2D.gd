@@ -8,6 +8,8 @@ func _ready():
 func _process(delta):
 	var States = get_parent().States
 	var state = get_parent().state
+	
+	"""
 	var direction = get_parent().last_direction
 	
 	if state != States.PUNCHED:
@@ -16,3 +18,4 @@ func _process(delta):
 	else:
 		shape.radius = 27
 		shape.height = 55
+	"""

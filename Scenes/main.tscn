@@ -1,12 +1,12 @@
 [gd_scene load_steps=11 format=3 uid="uid://cp4px435kdc3p"]
 
 [ext_resource type="Script" path="res://Scenes/main.gd" id="1_8la2p"]
-[ext_resource type="PackedScene" uid="uid://btnlv2vwv2vd8" path="res://Scenes/Characters/player.tscn" id="1_eip41"]
 [ext_resource type="PackedScene" uid="uid://d2r7fs0237ltw" path="res://Scenes/World/floor.tscn" id="2_awqle"]
 [ext_resource type="Script" path="res://Scenes/Ledge.gd" id="2_vioio"]
 [ext_resource type="Script" path="res://Scenes/Dead.gd" id="4_ft6to"]
 [ext_resource type="PackedScene" uid="uid://c01b7svihusgt" path="res://Scenes/UI/fight_ui.tscn" id="5_y0ins"]
 [ext_resource type="Script" path="res://Scenes/Camera.gd" id="6_84fw5"]
+[ext_resource type="PackedScene" uid="uid://y35te8r4kf26" path="res://Scenes/Characters/BaseCharacter/player.tscn" id="8_r5yd3"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xw33e"]
 size = Vector2(3501, 614)
@@ -51,25 +51,8 @@ debug_color = Color(0.827451, 0, 0.94902, 0.419608)
 position = Vector2(0, -1401)
 scale = Vector2(7.245, 1)
 
-[node name="Player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
-position = Vector2(-411, 309)
-player_id = 1
-camera = NodePath("../Camera2D")
-r = 1.0
-g = 0.7
-b = 0.7
-avoid_layer = 8
-avoid_mask = 9
-
-[node name="Player2" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("1_eip41")]
-position = Vector2(411, 309)
-player_id = 2
-camera = NodePath("../Camera2D")
-r = 0.7
-g = 0.7
-b = 1.0
-avoid_layer = 16
-avoid_mask = 17
+[node name="Player" parent="." instance=ExtResource("8_r5yd3")]
+position = Vector2(-380, 330)
 
 [node name="HUD" parent="." instance=ExtResource("5_y0ins")]
 

@@ -3,10 +3,12 @@
 importer="csv_translation"
 type="Translation"
 uid="uid://b3h7ad6u6u4rj"
+valid=false
 
 [deps]
 
 source_file="res://Assets/Dialog/Test.csv"
+
 [params]
 
 compress=true
