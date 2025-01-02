@@ -5,14 +5,20 @@ The state machine will be checked based on the player state, this will let us
 activate code for one or the other state, and based on that, handle movement 
 from the player.
 
-1. So the player sets his state.
-2. This code reads the player state and sets the specific state node visible.
-3. The node will check if the element is visible, if it is, it will do what it has to do.
+This contains 2 different "state checkers":
+	1. General State: this is a value that can be divided by "moving, attacking and hitted"
+	there we will set all the logic of the elements who make that state, so for example:
+	in "MOVING" we have all the logic for movement of the player and activations of states for it
+	
+	2. Actions: these are the action itself being executed, so for example if the player does a jab
+	this action will be selected and the animation for that especific action will be setted
+	
+The main reason of the setting of actions in here instead on the specific nodes is because there are
+elements who can generally affect others, for example the BodyCollider, since some actions change the 
+size and position of it, we will have all here so we can then there change the value manually.
 """
 
 @onready var player = $".."
-
-# This load could be automatic ❌
 @onready var state_machine_nodes: Dictionary
 
 var actual_state: State = null

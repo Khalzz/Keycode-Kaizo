@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Scenes/Characters/BaseCharacter/Scripts/state_machine.gd" id="1_3f0ff"]
 [ext_resource type="Script" path="res://Scenes/Characters/BaseCharacter/Scripts/player.gd" id="1_ses0c"]
 [ext_resource type="Script" path="res://Scenes/Characters/CollisionShape2D.gd" id="2_3ysyi"]
-[ext_resource type="Shape2D" uid="uid://df8yau3qq778v" path="res://Scenes/Characters/BaseCharacter/Colliders/Body/punched.tres" id="2_up2q6"]
+[ext_resource type="Shape2D" uid="uid://cqafn3vrdwvei" path="res://Scenes/Characters/BaseCharacter/Colliders/Body/crouching.tres" id="2_io7wf"]
 [ext_resource type="Script" path="res://Scenes/Characters/BaseCharacter/moving.gd" id="3_p5max"]
 [ext_resource type="Script" path="res://Scenes/Characters/AnimationPlayer.gd" id="15_b6yw4"]
 [ext_resource type="Texture2D" uid="uid://lu3e3dednw74" path="res://Assets/Sprites/Player/SpriteSheet/AnimationSpriteSheet.png" id="16_7t3yc"]
@@ -87,30 +87,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [16]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("BodyCollider:shape")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("2_up2q6")]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("BodyCollider:position")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(0, 1)]
 }
 
 [sub_resource type="Animation" id="Animation_wf4kq"]
@@ -502,30 +478,6 @@ tracks/2/keys = {
 "update": 1,
 "values": [0]
 }
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("BodyCollider:shape")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [ExtResource("2_up2q6")]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("BodyCollider:position")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(0, 1)]
-}
 
 [sub_resource type="Animation" id="Animation_vtrkj"]
 resource_name = "ROLLING"
@@ -804,8 +756,8 @@ floor_snap_length = 0.0
 script = ExtResource("1_ses0c")
 
 [node name="BodyCollider" type="CollisionShape2D" parent="."]
-position = Vector2(0, 1)
-shape = ExtResource("2_up2q6")
+position = Vector2(0, 16)
+shape = ExtResource("2_io7wf")
 debug_color = Color(0, 0.6, 0.701961, 0.419608)
 script = ExtResource("2_3ysyi")
 
@@ -831,7 +783,7 @@ scale = Vector2(0.235, 0.235)
 texture = ExtResource("16_7t3yc")
 hframes = 10
 vframes = 5
-frame = 22
+frame = 7
 
 [node name="HITBOXES" type="Node2D" parent="."]
 

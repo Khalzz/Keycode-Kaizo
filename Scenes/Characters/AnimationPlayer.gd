@@ -16,4 +16,4 @@ func _process(delta):
 		character_sprite.flip_h = true
 		
 	
-	play(state_machine.actual_state.InnerStates.find_key(state_machine.actual_state.inner_state))
+	play(player.Actions.find_key(player.action))

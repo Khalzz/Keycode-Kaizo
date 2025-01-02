@@ -15,25 +15,11 @@ The movement design for the base player is mainly designed for the posibility of
 	4. Dashing ❌
 """
 
-enum InnerStates {
-	IDLE,
-	WALKING,
-	RUNNING,
-	CROUCHING,
-	JUMPING,
-	FALLING
-}
+@onready var player = $"../.."
 
 # Movement base variables
 const JUMP_VELOCITY = -500.0
 const SPEED = 800.0
-
-@export var inner_state = InnerStates.IDLE
-@onready var player = $"../.."
-
-# Input
-var direction: Vector2
-@export var dead_zone: float = 0.1
 
 # Jumping Logic
 @export var max_jump_count = 2
@@ -41,7 +27,6 @@ var jump_count = 1
 var jump_direction = 0
 var is_jumping = false
 var can_jump = false
-
 
 # Timers for Timed Actions
 @onready var jump_timer = $"../../TimedActions/Jump"
@@ -51,35 +36,25 @@ func PhysicsUpdate(delta: float):
 	jumpLogic(delta)
 
 func movementLogic(delta):
-	if player.device_id == -1:
-		direction = Input.get_vector("left", "right", "down", "up")
-	else:
-		direction = Vector2(Input.get_joy_axis(player.device_id, JOY_AXIS_LEFT_X), -Input.get_joy_axis(player.device_id, JOY_AXIS_LEFT_Y))
-	
-	if direction.y < 0.0:
-		inner_state = InnerStates.CROUCHING
-	
-	if player.is_on_floor() and player.velocity.x == 0.0 and inner_state != InnerStates.CROUCHING:
-		inner_state = InnerStates.CROUCHING
+	if player.is_on_floor() and player.velocity.x == 0.0 and player.action != player.Actions.CROUCHING:
+		player.action = player.Actions.CROUCHING
 	
 	if player.is_on_floor():
-		player.last_direction = direction.x
+		player.last_direction = player.direction.x
 	
-	if abs(direction.x) > dead_zone:
-		# walk or run here
+	if player.direction.x != 0.0:
 		if player.is_on_floor():
-			inner_state = InnerStates.RUNNING
-			player.velocity.x = move_toward(player.velocity.x, direction.x * player.max_speed, (player.acceleration * delta))
+			player.action = player.Actions.RUNNING
+			player.velocity.x = move_toward(player.velocity.x, player.direction.x * player.max_speed, (player.acceleration * delta))
 		else:
-			player.velocity.x = move_toward(player.velocity.x, direction.x * player.max_speed, (player.acceleration * delta) / 2.0)
+			player.velocity.x = move_toward(player.velocity.x, player.direction.x * player.max_speed, (player.acceleration * delta) / 2.0)
 	else:
-		# idle or crouch
 		if player.is_on_floor():
-			if direction.y < -dead_zone:
-				inner_state = InnerStates.CROUCHING
+			if player.direction.y < 0.0:
+				player.action = player.Actions.CROUCHING
 				player.velocity.x = 0.0
 			else:
-				inner_state = InnerStates.IDLE
+				player.action = player.Actions.IDLE
 				player.velocity.x = move_toward(player.velocity.x, 0.0, delta * player.decceleration)
 		else:
 			player.velocity.x = move_toward(player.velocity.x, 0.0, delta * player.air_decceleration)
@@ -91,11 +66,11 @@ func jumpLogic(delta):
 		jump_count = max_jump_count
 	
 	if (player.jump_input and jump_count > 0 and jump_timer.is_stopped() and can_jump):
-		player.last_direction = direction.x
+		player.last_direction = player.direction.x
 		jump_timer.start()
 		jump_count -= 1
 		can_jump = false
-		inner_state = InnerStates.JUMPING
+		player.action = player.Actions.JUMPING
 		player.gravity_multiplier = 2.0
 		
 	if !jump_timer.is_stopped():
@@ -106,5 +81,5 @@ func jumpLogic(delta):
 		can_jump = true
 		
 	if jump_timer.is_stopped() and !player.is_on_floor():
-		inner_state = InnerStates.FALLING
+		player.action = player.Actions.FALLING
 		player.gravity_multiplier = 4.0

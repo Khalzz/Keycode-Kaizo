@@ -2,20 +2,21 @@ extends CollisionShape2D
 
 @onready var player = $".."
 
-func _ready():
-	pass # Replace with function body.
+var crouching_collider = {
+	"collider": preload("res://Scenes/Characters/BaseCharacter/Colliders/Body/crouching.tres"),
+	"position": Vector2(0.0, 16.0)
+}
+
+var standing_collider = {
+	"collider": preload("res://Scenes/Characters/BaseCharacter/Colliders/Body/standing.tres"),
+	"position": Vector2(0.0, 0.0)
+}
 
 func _process(delta):
-	var States = get_parent().States
-	var state = get_parent().state
-	
-	"""
-	var direction = get_parent().last_direction
-	
-	if state != States.PUNCHED:
-		shape.radius = 10
-		shape.height = 84
-	else:
-		shape.radius = 27
-		shape.height = 55
-	"""
+	match player.action:
+		player.Actions.CROUCHING:
+			shape = crouching_collider.collider
+			position = crouching_collider.position
+		_:
+			shape = standing_collider.collider
+			position = standing_collider.position
